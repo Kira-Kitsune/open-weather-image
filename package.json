@@ -12,7 +12,7 @@
         "url": "git+https://github.com/Kira-Kitsune/open-weather-image.git"
     },
     "author": "Kira Kitsune",
-    "license": "ISC",
+    "license": "MIT",
     "bugs": {
         "url": "https://github.com/Kira-Kitsune/open-weather-image/issues"
     },
