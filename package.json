@@ -1,0 +1,26 @@
+{
+    "name": "open-weather-image",
+    "version": "1.0.0",
+    "description": "A npm package to create images from the open weather API",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "build": "tsc"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Kira-Kitsune/open-weather-image.git"
+    },
+    "author": "Kira Kitsune",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/Kira-Kitsune/open-weather-image/issues"
+    },
+    "homepage": "https://github.com/Kira-Kitsune/open-weather-image#readme",
+    "devDependencies": {
+        "typescript": "^4.6.4"
+    },
+    "files": [
+        "lib/**/*"
+    ]
+}
