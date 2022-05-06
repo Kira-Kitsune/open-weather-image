@@ -1,10 +1,10 @@
 import axios, { AxiosError } from 'axios';
-import { createCanvas, CanvasRenderingContext2D, loadImage } from 'canvas';
-
-type size = '1' | '2' | '4';
-const icon = (iconCode: string): string => {
-    return `http://openweathermap.org/img/wn/${iconCode}@1x.png`;
-};
+import {
+    createCanvas,
+    CanvasRenderingContext2D,
+    loadImage,
+    Image,
+} from 'canvas';
 
 export interface IOpenWeatherImage {
     key: string;
@@ -16,6 +16,10 @@ export interface IOpenWeatherImage {
 type TimeLocalised = {
     date: string;
     time: string;
+};
+
+const icon = (iconCode: string): string => {
+    return __dirname + `/svg/${iconCode}.svg`;
 };
 
 const getResponse = async (URL: string): Promise<any> => {
@@ -159,17 +163,41 @@ const createCurrentCtx = async (
     const { icon: iconToday } = weatherToday[0];
 
     let leftPos: number;
+    let leftColour: string;
+    let rightColour: string;
+    let colour;
 
-    ctx.fillStyle = '#019AF3';
-    ctx.fillRect(0, 0, (currentWidth * 2) / 3 + 1, currentHeight);
-    ctx.fillStyle = '#0184D0';
-    ctx.fillRect((currentWidth * 2) / 3, 0, currentWidth, currentHeight);
+    const dayTime: boolean = dt >= sunriseDT && dt < sunsetDT;
 
-    // const imgToday = await loadImage(icon(iconToday));
-    // ctx.drawImage(imgToday, (currentWidth * 2) / 3, currentHeight / 2);
+    if (dayTime) {
+        leftColour = '#019AF3';
+        rightColour = '#0184D0';
+        colour = 'black';
+    } else {
+        leftColour = '#25395C';
+        rightColour = '#1C2A4F';
+        colour = 'white';
+    }
 
-    ctx.fillStyle = 'black';
-    ctx.strokeStyle = 'black';
+    ctx.fillStyle = leftColour;
+    ctx.fillRect(-20, -20, (currentWidth * 2) / 3 + 21, currentHeight + 20);
+
+    ctx.fillStyle = rightColour;
+    ctx.fillRect(
+        (currentWidth * 2) / 3 - 20,
+        -20,
+        currentWidth + 20,
+        currentHeight + 20
+    );
+
+    const imgToday = dayTime
+        ? await loadImage(icon(iconToday))
+        : await loadImage(icon(iconToday.replace('d', 'n')));
+
+    ctx.drawImage(imgToday, 383.333, 100, 100, 100);
+
+    ctx.fillStyle = colour;
+    ctx.strokeStyle = colour;
 
     leftPos = 22;
 
@@ -206,10 +234,10 @@ const createCurrentCtx = async (
     );
 
     ctx.font = font(16);
-    ctx.fillText(capitaliseFirstLetter(description), 45, 191);
+    ctx.fillText(capitaliseFirstLetter(description), 48, 191);
 
-    // const imgCurrent = await loadImage(icon(iconCurrent));
-    // ctx.drawImage(imgCurrent, leftPos, 191);
+    const imgCurrent = await loadImage(icon(iconCurrent));
+    ctx.drawImage(imgCurrent, leftPos, 174, 22, 22);
 
     ctx.beginPath();
     ctx.lineTo(15, 200);
