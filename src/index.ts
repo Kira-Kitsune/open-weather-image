@@ -1,10 +1,5 @@
 import axios, { AxiosError } from 'axios';
-import {
-    createCanvas,
-    CanvasRenderingContext2D,
-    loadImage,
-    Image,
-} from 'canvas';
+import { createCanvas, CanvasRenderingContext2D, loadImage } from 'canvas';
 
 export interface IOpenWeatherImage {
     key: string;

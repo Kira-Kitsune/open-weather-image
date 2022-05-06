@@ -4,6 +4,10 @@ open-weather-image is a image creation (base64 png) to show current weather data
 
 Forecast data is loaded from [OpenWeather API](https://openweathermap.org)
 
+![Daytime](https://github.com/Kira-Kitsune/open-weather-image/blob/main/daytime.png?raw=true)
+
+![Nighttime](https://github.com/Kira-Kitsune/open-weather-image/blob/main/nighttime.png?raw=true)
+
 # Installation
 
 ```sh
@@ -21,3 +25,9 @@ import { createWeatherImageToday } from 'open-weather-image'
 
 const image = await createWeatherImageToday({ key: 'YOUR API KEY', cityName: 'Adelaide' })
 ```
+
+---
+
+open-weather-image is available under the MIT license. See the LICENSE.md file for more info.
+
+Copyright &copy; 2022 Kira Kitsune <https://kirakitsune.com>, All rights reserved.
