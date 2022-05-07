@@ -1,7 +1,16 @@
 import axios, { AxiosError } from 'axios';
 import { createCanvas, CanvasRenderingContext2D, loadImage } from 'canvas';
 
-export interface IOpenWeatherImage {
+const defaultTheme = {
+    dayThemeLeft: '#FFD982',
+    dayThemeRight: '#5ECEF6',
+    dayThemeText: 'black',
+    nightThemeLeft: '#25395C',
+    nightThemeRight: '#1C2A4F',
+    nightThemeText: 'white',
+};
+
+export interface OpenWeatherArgs {
     key: string;
     cityName: string;
     stateCode?: string;
@@ -90,7 +99,7 @@ const capitaliseFirstLetter = (string: string): string => {
 };
 
 export const createWeatherImageToday = async (
-    args: IOpenWeatherImage
+    args: OpenWeatherArgs
 ): Promise<string> => {
     const { key, cityName, stateCode, countryCode } = args;
 
@@ -132,7 +141,8 @@ const createCurrentCtx = async (
     currentWidth: number,
     currentHeight: number,
     weatherResponse: any,
-    forecastResponse: any
+    forecastResponse: any,
+    theme = defaultTheme
 ) => {
     const { name, sys } = weatherResponse;
     const { country } = sys;
@@ -165,13 +175,13 @@ const createCurrentCtx = async (
     const dayTime: boolean = dt >= sunriseDT && dt < sunsetDT;
 
     if (dayTime) {
-        leftColour = '#019AF3';
-        rightColour = '#0184D0';
-        colour = 'black';
+        leftColour = theme.dayThemeLeft;
+        rightColour = theme.dayThemeRight;
+        colour = theme.dayThemeText;
     } else {
-        leftColour = '#25395C';
-        rightColour = '#1C2A4F';
-        colour = 'white';
+        leftColour = theme.nightThemeLeft;
+        rightColour = theme.nightThemeRight;
+        colour = theme.nightThemeText;
     }
 
     ctx.fillStyle = leftColour;
@@ -209,23 +219,22 @@ const createCurrentCtx = async (
     ctx.lineTo(304, 100);
     ctx.stroke();
 
-    ctx.font = font(45);
+    ctx.font = font(44);
     const currentTemp: string = `${Math.round(temp)}°C`;
     const { width: tempWidth } = ctx.measureText(currentTemp);
-    ctx.fillText(currentTemp, leftPos, 150);
+    ctx.fillText(currentTemp, leftPos - 2, 145);
 
     ctx.font = font(16);
     ctx.fillText(
         `Feels Like: ${Math.round(feels_like)}°C`,
-        leftPos + tempWidth + 6,
-        150
+        leftPos + tempWidth + 4,
+        145
     );
 
-    ctx.font = font(12);
     ctx.fillText(
-        `${Math.round(tempMin)} / ${Math.round(tempMax)}°C`,
+        `${Math.round(tempMin)}°C / ${Math.round(tempMax)}°C`,
         leftPos,
-        170
+        167.5
     );
 
     ctx.font = font(16);
@@ -243,11 +252,18 @@ const createCurrentCtx = async (
 
     const { time: sunrise } = timestampConverter(sunriseDT, timezone);
     const { time: sunset } = timestampConverter(sunsetDT, timezone);
-    const tTab = `\u0009\u0009\u0009`;
 
     ctx.fillText(`Wind: ${wind_speed}km/h (${dir(wind_deg)})`, leftPos, 218);
     ctx.fillText(`Humidity: ${humidity}%`, leftPos, 233);
     ctx.fillText(`UV Index: ${uvi} (${uvIndexServeness(uvi)})`, leftPos, 248);
     ctx.fillText(`Chance of Rain: ${pop * 100}%`, leftPos, 263);
-    ctx.fillText(`Sunrise: ${sunrise}${tTab}Sunset: ${sunset}`, leftPos, 278);
+
+    leftPos = currentWidth / 3 + 12;
+    const imgSunrise = await loadImage(icon(dayTime ? 'sunrised' : 'sunrisen'));
+    ctx.drawImage(imgSunrise, leftPos, 204, 44, 22);
+    ctx.fillText(`${sunrise}`, leftPos + 52, 221);
+
+    const imgSunset = await loadImage(icon(dayTime ? 'sunsetd' : 'sunsetn'));
+    ctx.drawImage(imgSunset, leftPos, 234, 44, 22);
+    ctx.fillText(`${sunset}`, leftPos + 52, 251);
 };

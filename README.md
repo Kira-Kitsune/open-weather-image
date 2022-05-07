@@ -4,6 +4,8 @@ open-weather-image is a image creation (base64 png) to show current weather data
 
 Forecast data is loaded from [OpenWeather API](https://openweathermap.org)
 
+The theme changes if it's daytime or nighttime as shown below
+
 ![Daytime](https://github.com/Kira-Kitsune/open-weather-image/blob/main/daytime.png?raw=true)
 
 ![Nighttime](https://github.com/Kira-Kitsune/open-weather-image/blob/main/nighttime.png?raw=true)
