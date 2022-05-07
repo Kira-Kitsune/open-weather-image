@@ -2,15 +2,26 @@
     "name": "open-weather-image",
     "version": "1.0.0",
     "description": "A npm package to create images (base64 png) from the open weather API",
-    "main": "index.js",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1",
-        "build": "tsc"
+        "build": "tsc",
+        "prepare": "npm run build"
     },
     "repository": {
         "type": "git",
         "url": "git+https://github.com/Kira-Kitsune/open-weather-image.git"
     },
+    "keywords": [
+        "weather",
+        "openweather",
+        "canvas",
+        "image",
+        "openweatherapi",
+        "openweathermap",
+        "base64",
+        "png"
+    ],
     "author": "Kira Kitsune",
     "license": "MIT",
     "bugs": {
