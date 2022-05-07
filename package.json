@@ -1,7 +1,7 @@
 {
     "name": "open-weather-image",
     "version": "1.0.0",
-    "description": "A npm package to create images from the open weather API",
+    "description": "A npm package to create images (base64 png) from the open weather API",
     "main": "index.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
