@@ -265,7 +265,7 @@ const createCurrentCtx = async (
     ctx.fillText(`Wind: ${wind_speed}km/h (${dir(wind_deg)})`, leftPos, 218);
     ctx.fillText(`Humidity: ${humidity}%`, leftPos, 233);
     ctx.fillText(`UV Index: ${uvi} (${uvIndexServeness(uvi)})`, leftPos, 248);
-    ctx.fillText(`Today's Chance of Rain: ${pop * 100}%`, leftPos, 263);
+    ctx.fillText(`Chance of Rain: ${pop * 100}%`, leftPos, 263);
 
     const nextLeftPos = currentWidth / 3 + 26;
     let upPosRain = 278;
