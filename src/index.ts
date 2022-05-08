@@ -119,7 +119,7 @@ export const createWeatherImageToday = async (
 
     const currentWidth = 520;
     const canvasWidth = currentWidth;
-    const currentHeight = 300;
+    const currentHeight = 320;
     const canvasHeight = currentHeight;
 
     const canvas = createCanvas(canvasWidth, canvasHeight);
@@ -159,11 +159,20 @@ const createCurrentCtx = async (
         sunset: sunsetDT,
         humidity,
         weather: currentWeather,
+        rain: rainCurrent,
+        snow: snowCurrent,
     } = current;
     const { description, icon: iconCurrent } = currentWeather[0];
 
     const today = daily[0];
-    const { temp: tempToday, uvi, pop, weather: weatherToday } = today;
+    const {
+        temp: tempToday,
+        uvi,
+        pop,
+        weather: weatherToday,
+        rain: rainToday,
+        snow: snowToday,
+    } = today;
     const { min: tempMin, max: tempMax } = tempToday;
     const { icon: iconToday } = weatherToday[0];
 
@@ -185,12 +194,12 @@ const createCurrentCtx = async (
     }
 
     ctx.fillStyle = leftColour;
-    ctx.fillRect(-20, -20, (currentWidth * 2) / 3 + 21, currentHeight + 20);
+    ctx.fillRect(0, 0, (currentWidth * 2) / 3 + 21, currentHeight + 20);
 
     ctx.fillStyle = rightColour;
     ctx.fillRect(
-        (currentWidth * 2) / 3 - 20,
-        -20,
+        (currentWidth * 2) / 3,
+        0,
         currentWidth + 20,
         currentHeight + 20
     );
@@ -256,14 +265,44 @@ const createCurrentCtx = async (
     ctx.fillText(`Wind: ${wind_speed}km/h (${dir(wind_deg)})`, leftPos, 218);
     ctx.fillText(`Humidity: ${humidity}%`, leftPos, 233);
     ctx.fillText(`UV Index: ${uvi} (${uvIndexServeness(uvi)})`, leftPos, 248);
-    ctx.fillText(`Chance of Rain: ${pop * 100}%`, leftPos, 263);
+    ctx.fillText(`Today's Chance of Rain: ${pop * 100}%`, leftPos, 263);
 
-    leftPos = currentWidth / 3 + 12;
+    const nextLeftPos = currentWidth / 3 + 26;
+    let upPosRain = 278;
+
+    if (rainToday) {
+        ctx.fillText(`Today's Rain: ${rainToday}mm`, leftPos, upPosRain);
+        if (!rainCurrent) {
+            upPosRain += 15;
+        }
+    }
+
+    if (rainCurrent) {
+        ctx.fillText(
+            `Rain Last 1hr: ${rainCurrent['1h']}mm`,
+            nextLeftPos - 15,
+            upPosRain
+        );
+        upPosRain += 15;
+    }
+
+    if (snowToday) {
+        ctx.fillText(`Today's Snow: ${snowToday}mm`, leftPos, upPosRain);
+    }
+
+    if (snowCurrent) {
+        ctx.fillText(
+            `Snow Last 1hr: ${snowCurrent['1h']}mm`,
+            nextLeftPos - 15,
+            263
+        );
+    }
+
     const imgSunrise = await loadImage(icon(dayTime ? 'sunrised' : 'sunrisen'));
-    ctx.drawImage(imgSunrise, leftPos, 204, 44, 22);
-    ctx.fillText(`${sunrise}`, leftPos + 52, 221);
+    ctx.drawImage(imgSunrise, nextLeftPos, 204, 44, 22);
+    ctx.fillText(`${sunrise}`, nextLeftPos + 52, 221);
 
     const imgSunset = await loadImage(icon(dayTime ? 'sunsetd' : 'sunsetn'));
-    ctx.drawImage(imgSunset, leftPos, 234, 44, 22);
-    ctx.fillText(`${sunset}`, leftPos + 52, 251);
+    ctx.drawImage(imgSunset, nextLeftPos, 234, 44, 22);
+    ctx.fillText(`${sunset}`, nextLeftPos + 52, 251);
 };
