@@ -104,8 +104,8 @@ export const createWeatherImageToday = async (
     const { key, cityName, stateCode, countryCode } = args;
 
     let query: string = cityName;
-    if (stateCode) query.concat(',', stateCode);
-    if (countryCode) query.concat(',', countryCode);
+    if (stateCode !== undefined) query += ',' + stateCode;
+    if (countryCode !== undefined) query += ',' + countryCode;
 
     const WEATHER_URL = `https://api.openweathermap.org/data/2.5/weather?q=${query}&appid=${key}&units=metric&lang={en}`;
 

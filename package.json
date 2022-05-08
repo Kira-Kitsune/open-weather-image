@@ -28,12 +28,12 @@
         "url": "https://github.com/Kira-Kitsune/open-weather-image/issues"
     },
     "homepage": "https://github.com/Kira-Kitsune/open-weather-image#readme",
-    "devDependencies": {
-        "typescript": "^4.6.4"
-    },
     "files": [
         "dist/**/*"
     ],
+    "devDependencies": {
+        "typescript": "^4.6.4"
+    },
     "dependencies": {
         "axios": "^0.27.2",
         "canvas": "^2.9.1"
