@@ -20,7 +20,9 @@
         "openweatherapi",
         "openweathermap",
         "base64",
-        "png"
+        "png",
+        "types",
+        "typescript"
     ],
     "author": "Kira Kitsune",
     "license": "MIT",
@@ -32,6 +34,7 @@
         "dist/**/*"
     ],
     "devDependencies": {
+        "@types/whatwg-url": "^8.2.1",
         "typescript": "^4.6.4"
     },
     "dependencies": {
