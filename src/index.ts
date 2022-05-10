@@ -1,5 +1,13 @@
-import axios, { AxiosError } from 'axios';
 import { createCanvas, CanvasRenderingContext2D, loadImage } from 'canvas';
+import {
+    icon,
+    getResponse,
+    uvIndexServeness,
+    dir,
+    font,
+    timestampConverter,
+    capitaliseFirstLetter,
+} from './utils/helperFunctions';
 
 const defaultTheme = {
     dayThemeLeft: '#FFD982',
@@ -10,102 +18,21 @@ const defaultTheme = {
     nightThemeText: 'white',
 };
 
-export interface OpenWeatherArgs {
+interface OpenWeatherArgs {
     key: string;
     cityName: string;
     stateCode?: string;
     countryCode?: string;
 }
 
-type TimeLocalised = {
-    date: string;
-    time: string;
-};
-
-const icon = (iconCode: string): string => {
-    return __dirname + `/svg/${iconCode}.svg`;
-};
-
-const getResponse = async (URL: string): Promise<any> => {
-    return await axios
-        .get(URL)
-        .then((res) => res.data)
-        .catch(async (err: AxiosError) =>
-            console.error(`An API error has occurred | ${err}`)
-        );
-};
-
-const uvIndexServeness = (uvIndex: number): string => {
-    let uviServeness: string;
-
-    if (uvIndex > 0 && uvIndex <= 2.5) uviServeness = 'Low';
-    else if (uvIndex > 2.5 && uvIndex <= 5.5) uviServeness = 'Moderate';
-    else if (uvIndex > 5.5 && uvIndex <= 7.5) uviServeness = 'High';
-    else if (uvIndex > 7.5 && uvIndex <= 10.5) uviServeness = 'Very High';
-    else if (uvIndex > 10.5) uviServeness = 'Extreme';
-    else uviServeness = 'Error';
-
-    return uviServeness;
-};
-
-const dir = (deg: number): string => {
-    let dir: string;
-
-    if (deg >= 0 && deg < 22.5) dir = 'N';
-    else if (deg >= 22.5 && deg < 67.5) dir = 'NE';
-    else if (deg >= 67.5 && deg < 112.5) dir = 'E';
-    else if (deg >= 112.5 && deg < 157.5) dir = 'SE';
-    else if (deg >= 157.5 && deg < 202.5) dir = 'S';
-    else if (deg >= 202.5 && deg < 247.5) dir = 'SW';
-    else if (deg >= 247.5 && deg < 292.5) dir = 'W';
-    else if (deg >= 292.5 && deg < 337.5) dir = `NW`;
-    else if (deg >= 337.5 && deg <= 360) dir = 'N';
-    else dir = 'Error';
-
-    return dir;
-};
-
-const font = (size: number, name: string = 'Arial'): string => {
-    return `${size}px ${name}`;
-};
-
-const timestampConverter = (
-    timestamp: number,
-    timeZone: string
-): TimeLocalised => {
-    const date = new Date(timestamp * 1000);
-
-    const timeOptions: Intl.DateTimeFormatOptions = {
-        timeStyle: 'short',
-        timeZone,
-    };
-    const dateOptions: Intl.DateTimeFormatOptions = {
-        weekday: 'short',
-        month: 'long',
-        day: 'numeric',
-        timeZone,
-    };
-
-    return {
-        date: new Intl.DateTimeFormat('en-AU', dateOptions)
-            .format(date)
-            .replace(',', ''),
-        time: new Intl.DateTimeFormat('en-AU', timeOptions).format(date),
-    };
-};
-
-const capitaliseFirstLetter = (string: string): string => {
-    return string.charAt(0).toUpperCase() + string.slice(1);
-};
-
-export const createWeatherImageToday = async (
+const createWeatherImageToday = async (
     args: OpenWeatherArgs
 ): Promise<string> => {
     const { key, cityName, stateCode, countryCode } = args;
 
     let query: string = cityName;
-    if (stateCode !== undefined) query += ',' + stateCode;
-    if (countryCode !== undefined) query += ',' + countryCode;
+    if (stateCode) query += ',' + stateCode;
+    if (countryCode) query += ',' + countryCode;
 
     const WEATHER_URL = `https://api.openweathermap.org/data/2.5/weather?q=${query}&appid=${key}&units=metric&lang={en}`;
 
@@ -279,7 +206,7 @@ const createCurrentCtx = async (
 
     if (rainCurrent) {
         ctx.fillText(
-            `Rain Last 1hr: ${rainCurrent['1h']}mm`,
+            `Rain Last Hour: ${rainCurrent['1h']}mm`,
             nextLeftPos - 15,
             upPosRain
         );
@@ -292,7 +219,7 @@ const createCurrentCtx = async (
 
     if (snowCurrent) {
         ctx.fillText(
-            `Snow Last 1hr: ${snowCurrent['1h']}mm`,
+            `Snow Last Hour: ${snowCurrent['1h']}mm`,
             nextLeftPos - 15,
             263
         );
@@ -306,3 +233,5 @@ const createCurrentCtx = async (
     ctx.drawImage(imgSunset, nextLeftPos, 234, 44, 22);
     ctx.fillText(`${sunset}`, nextLeftPos + 52, 251);
 };
+
+export { OpenWeatherArgs, createWeatherImageToday };
