@@ -21,6 +21,7 @@
         "openweathermap",
         "base64",
         "png",
+        "buffer",
         "types",
         "typescript"
     ],

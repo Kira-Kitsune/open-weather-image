@@ -1,17 +1,23 @@
 import axios, { AxiosError } from 'axios';
-import { TimeLocalised } from './types';
+import {
+    DaytimeAndColourArgs,
+    DaytimeAndColours,
+    OpenWeatherArgs,
+    TimeLocalised,
+} from './types';
+import path = require('path');
 
-export const icon = (iconCode: string): string => {
-    return __dirname + `/svg/${iconCode}.svg`;
-};
-
-export const getResponse = async (URL: string): Promise<any> => {
+const getResponse = async (URL: string): Promise<any> => {
     return await axios
         .get(URL)
         .then((res) => res.data)
         .catch(async (err: AxiosError) =>
             console.error(`An API error has occurred | ${err}`)
         );
+};
+
+export const icon = (iconCode: string): string => {
+    return path.join(__dirname, `../svg/${iconCode}.svg`);
 };
 
 export const uvIndexServeness = (uvIndex: number): string => {
@@ -75,4 +81,57 @@ export const timestampConverter = (
 
 export const capitaliseFirstLetter = (string: string): string => {
     return string.charAt(0).toUpperCase() + string.slice(1);
+};
+
+export const grabData = async (
+    args: OpenWeatherArgs
+): Promise<{ weatherResponse: any; forecastResponse: any }> => {
+    const { key, cityName, stateCode, countryCode } = args;
+
+    let query: string = cityName;
+    if (stateCode) query += ',' + stateCode;
+    if (countryCode) query += ',' + countryCode;
+
+    const WEATHER_URL = `https://api.openweathermap.org/data/2.5/weather?q=${query}&appid=${key}&units=metric&lang={en}`;
+
+    const weatherResponse = await getResponse(WEATHER_URL);
+
+    const { coord } = await weatherResponse;
+    const { lat, lon } = coord;
+
+    const FORECAST_URL = `https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&exclude=minutely,hourly&appid=${key}&units=metric&lang={en}`;
+    const forecastResponse = await getResponse(FORECAST_URL);
+
+    return { weatherResponse, forecastResponse };
+};
+
+export const getDaytimeAndColours = async (
+    args: DaytimeAndColourArgs
+): Promise<DaytimeAndColours> => {
+    const { forecastResponse, theme } = args;
+
+    const { current } = forecastResponse;
+    const { dt, sunrise, sunset } = current;
+
+    const dayTime = dt >= sunrise && dt < sunset;
+    let textColour: string;
+    let leftColour: string;
+    let rightColour: string;
+
+    if (dayTime) {
+        textColour = theme.dayThemeText;
+        leftColour = theme.dayThemeLeft;
+        rightColour = theme.dayThemeRight;
+    } else {
+        textColour = theme.nightThemeText;
+        leftColour = theme.nightThemeLeft;
+        rightColour = theme.nightThemeRight;
+    }
+
+    return {
+        dayTime,
+        textColour,
+        leftColour,
+        rightColour,
+    };
 };

@@ -1,15 +1,17 @@
 import { createCanvas, CanvasRenderingContext2D, loadImage } from 'canvas';
 import {
     icon,
-    getResponse,
     uvIndexServeness,
     dir,
     font,
     timestampConverter,
     capitaliseFirstLetter,
+    grabData,
+    getDaytimeAndColours,
 } from './utils/helperFunctions';
+import { OpenWeatherArgs, Theme } from './utils/types';
 
-const defaultTheme = {
+const defaultTheme: Theme = {
     dayThemeLeft: '#FFD982',
     dayThemeRight: '#5ECEF6',
     dayThemeText: 'black',
@@ -18,59 +20,87 @@ const defaultTheme = {
     nightThemeText: 'white',
 };
 
-interface OpenWeatherArgs {
-    key: string;
-    cityName: string;
-    stateCode?: string;
-    countryCode?: string;
-}
+const canvasWidth: number = 520;
+const currentHeight: number = 320;
+const forecastHeight: number = 140;
+
+const canvasHeight: number = currentHeight + forecastHeight;
+
+let dayTime: boolean;
+
+let leftColour: string;
+let rightColour: string;
+let textColour: string;
 
 const createWeatherImageToday = async (
     args: OpenWeatherArgs
 ): Promise<string> => {
-    const { key, cityName, stateCode, countryCode } = args;
+    const { weatherResponse, forecastResponse } = await grabData(args);
 
-    let query: string = cityName;
-    if (stateCode) query += ',' + stateCode;
-    if (countryCode) query += ',' + countryCode;
-
-    const WEATHER_URL = `https://api.openweathermap.org/data/2.5/weather?q=${query}&appid=${key}&units=metric&lang={en}`;
-
-    const weatherResponse = await getResponse(WEATHER_URL);
-
-    const { coord } = await weatherResponse;
-    const { lat, lon } = coord;
-
-    const FORECAST_URL = `https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&exclude=minutely,hourly&appid=${key}&units=metric&lang={en}`;
-    const forecastResponse = await getResponse(FORECAST_URL);
-
-    const currentWidth = 520;
-    const canvasWidth = currentWidth;
-    const currentHeight = 320;
-    const canvasHeight = currentHeight;
-
-    const canvas = createCanvas(canvasWidth, canvasHeight);
+    const canvas = createCanvas(canvasWidth, currentHeight);
     const ctx = canvas.getContext('2d');
 
-    await createCurrentCtx(
-        ctx,
-        currentWidth,
-        currentHeight,
-        await weatherResponse,
-        await forecastResponse
-    );
+    const {
+        dayTime: dt,
+        leftColour: lc,
+        rightColour: rc,
+        textColour: tc,
+    } = await getDaytimeAndColours({
+        forecastResponse: await forecastResponse,
+        theme: defaultTheme,
+    });
+
+    dayTime = dt;
+    leftColour = lc;
+    rightColour = rc;
+    textColour = tc;
+
+    drawBackground(ctx);
+    await drawCurrent(ctx, await weatherResponse, await forecastResponse);
 
     return canvas.toDataURL();
 };
 
-const createCurrentCtx = async (
+const createWeatherImageTodayWithForecast = async (
+    args: OpenWeatherArgs
+): Promise<string | Buffer> => {
+    const { weatherResponse, forecastResponse } = await grabData(args);
+    const { bufferOutput } = args;
+
+    const {
+        dayTime: dt,
+        leftColour: lc,
+        rightColour: rc,
+        textColour: tc,
+    } = await getDaytimeAndColours({
+        forecastResponse: await forecastResponse,
+        theme: defaultTheme,
+    });
+
+    dayTime = dt;
+    leftColour = lc;
+    rightColour = rc;
+    textColour = tc;
+
+    const canvas = createCanvas(canvasWidth, canvasHeight);
+    const ctx = canvas.getContext('2d');
+
+    drawBackground(ctx, true);
+    await drawCurrent(ctx, await weatherResponse, await forecastResponse);
+    await drawForecast(ctx, await forecastResponse);
+
+    if (!bufferOutput) {
+        return canvas.toDataURL();
+    } else {
+        return canvas.toBuffer('image/png');
+    }
+};
+
+const drawCurrent = async (
     ctx: CanvasRenderingContext2D,
-    currentWidth: number,
-    currentHeight: number,
     weatherResponse: any,
-    forecastResponse: any,
-    theme = defaultTheme
-) => {
+    forecastResponse: any
+): Promise<void> => {
     const { name, sys } = weatherResponse;
     const { country } = sys;
 
@@ -104,32 +134,6 @@ const createCurrentCtx = async (
     const { icon: iconToday } = weatherToday[0];
 
     let leftPos: number;
-    let leftColour: string;
-    let rightColour: string;
-    let colour;
-
-    const dayTime: boolean = dt >= sunriseDT && dt < sunsetDT;
-
-    if (dayTime) {
-        leftColour = theme.dayThemeLeft;
-        rightColour = theme.dayThemeRight;
-        colour = theme.dayThemeText;
-    } else {
-        leftColour = theme.nightThemeLeft;
-        rightColour = theme.nightThemeRight;
-        colour = theme.nightThemeText;
-    }
-
-    ctx.fillStyle = leftColour;
-    ctx.fillRect(0, 0, (currentWidth * 2) / 3 + 21, currentHeight + 20);
-
-    ctx.fillStyle = rightColour;
-    ctx.fillRect(
-        (currentWidth * 2) / 3,
-        0,
-        currentWidth + 20,
-        currentHeight + 20
-    );
 
     const imgToday = dayTime
         ? await loadImage(icon(iconToday))
@@ -137,8 +141,8 @@ const createCurrentCtx = async (
 
     ctx.drawImage(imgToday, 383.333, 100, 100, 100);
 
-    ctx.fillStyle = colour;
-    ctx.strokeStyle = colour;
+    ctx.fillStyle = textColour;
+    ctx.strokeStyle = textColour;
 
     leftPos = 22;
 
@@ -194,7 +198,7 @@ const createCurrentCtx = async (
     ctx.fillText(`UV Index: ${uvi} (${uvIndexServeness(uvi)})`, leftPos, 248);
     ctx.fillText(`Chance of Rain: ${pop * 100}%`, leftPos, 263);
 
-    const nextLeftPos = currentWidth / 3 + 26;
+    const nextLeftPos = canvasWidth / 3 + 26;
     let upPosRain = 278;
 
     if (rainToday) {
@@ -227,11 +231,108 @@ const createCurrentCtx = async (
 
     const imgSunrise = await loadImage(icon(dayTime ? 'sunrised' : 'sunrisen'));
     ctx.drawImage(imgSunrise, nextLeftPos, 204, 44, 22);
-    ctx.fillText(`${sunrise}`, nextLeftPos + 52, 221);
+    ctx.fillText(sunrise, nextLeftPos + 52, 221);
 
     const imgSunset = await loadImage(icon(dayTime ? 'sunsetd' : 'sunsetn'));
     ctx.drawImage(imgSunset, nextLeftPos, 234, 44, 22);
-    ctx.fillText(`${sunset}`, nextLeftPos + 52, 251);
+    ctx.fillText(sunset, nextLeftPos + 52, 251);
 };
 
-export { OpenWeatherArgs, createWeatherImageToday };
+const drawForecast = async (
+    ctx: CanvasRenderingContext2D,
+    forecastResponse: any
+): Promise<void> => {
+    const { daily, timezone } = forecastResponse;
+
+    for (let i = 0; i < 4; i++) {
+        await drawForecastBox(ctx, daily[i + 1], timezone, i);
+    }
+};
+
+const drawForecastBox = async (
+    ctx: CanvasRenderingContext2D,
+    dayForecast: any,
+    timezone: string,
+    boxNum: number
+): Promise<void> => {
+    ctx.fillStyle = '#EEEEEE';
+    ctx.strokeStyle = 'black';
+
+    ctx.textAlign = 'center';
+
+    ctx.lineWidth = 1;
+
+    const topPadding: number = 15;
+    const sidePadding: number = 12;
+
+    const boxWidth = canvasWidth / 4;
+    const boxBottom = canvasHeight - topPadding;
+
+    const leftPos = boxWidth * boxNum + sidePadding;
+    const centre = boxWidth * boxNum + boxWidth / 2;
+    let topPos = currentHeight + topPadding;
+
+    const { dt, temp, weather } = dayForecast;
+    const { min, max } = temp;
+    const { description, icon: forecastIcon } = weather[0];
+    const { date } = timestampConverter(dt, timezone);
+
+    if (boxNum !== 0) {
+        ctx.beginPath();
+        ctx.lineTo(boxWidth * boxNum, topPos);
+        ctx.lineTo(boxWidth * boxNum, canvasHeight - topPadding);
+        ctx.stroke();
+    }
+
+    ctx.fillRect(
+        leftPos,
+        topPos,
+        boxWidth - sidePadding * 2,
+        forecastHeight - topPadding * 2
+    );
+
+    ctx.fillStyle = 'black';
+    ctx.font = font(12);
+
+    ctx.fillText(date, centre, (topPos += 12), boxWidth - sidePadding * 2);
+
+    topPos += 12;
+    const imgForecast = await loadImage(icon(forecastIcon));
+    ctx.drawImage(imgForecast, centre - 20, topPos, 40, 40);
+
+    ctx.font = font(10);
+    ctx.fillText(
+        capitaliseFirstLetter(description),
+        centre,
+        (topPos += 56),
+        boxWidth - sidePadding * 2
+    );
+
+    ctx.fillText(
+        `${Math.round(min)}°C / ${Math.round(max)}°C`,
+        centre,
+        boxBottom - 6
+    );
+};
+
+const drawBackground = (
+    ctx: CanvasRenderingContext2D,
+    forecast: boolean = false
+): void => {
+    ctx.fillStyle = leftColour;
+    ctx.fillRect(0, 0, canvasWidth * (2 / 3) + 1, currentHeight);
+
+    ctx.fillStyle = rightColour;
+    ctx.fillRect(canvasWidth * (2 / 3), 0, canvasWidth, currentHeight);
+
+    if (forecast) {
+        ctx.fillStyle = '#DDDDDD';
+        ctx.fillRect(0, currentHeight, canvasWidth, canvasHeight);
+    }
+};
+
+export {
+    OpenWeatherArgs,
+    createWeatherImageToday,
+    createWeatherImageTodayWithForecast,
+};
