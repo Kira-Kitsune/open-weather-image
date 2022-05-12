@@ -19,12 +19,16 @@ export interface Theme {
     nightThemeText: string;
 }
 
-export interface OpenWeatherArgs {
+export interface OpenWeatherArgs extends BaseOpenWeatherArgs {
+    bufferOutput?: boolean;
+}
+
+export interface BaseOpenWeatherArgs {
     key: string;
     cityName: string;
     stateCode?: string;
     countryCode?: string;
-    bufferOutput?: boolean;
+    imperialUnits?: boolean;
 }
 
 export interface DaytimeAndColourArgs {

@@ -8,6 +8,10 @@ import {
     capitaliseFirstLetter,
     grabData,
     getDaytimeAndColours,
+    convertToKPH,
+    applyText,
+    roundTo2,
+    rain,
 } from './utils/helperFunctions';
 import { OpenWeatherArgs, Theme } from './utils/types';
 
@@ -27,60 +31,52 @@ const forecastHeight: number = 140;
 const canvasHeight: number = currentHeight + forecastHeight;
 
 let dayTime: boolean;
+let imperial: boolean;
 
 let leftColour: string;
 let rightColour: string;
 let textColour: string;
 
+let tempUnit: string;
+
 const createWeatherImageToday = async (
     args: OpenWeatherArgs
-): Promise<string> => {
+): Promise<string | Buffer> => {
+    const { stateCode, countryCode, bufferOutput, imperialUnits } = args;
+
+    if (stateCode && !countryCode) {
+        throw `stateCode requires a countryCode provided with it`;
+    }
+
     const { weatherResponse, forecastResponse } = await grabData(args);
+
+    await setupVariables(forecastResponse, imperialUnits);
 
     const canvas = createCanvas(canvasWidth, currentHeight);
     const ctx = canvas.getContext('2d');
 
-    const {
-        dayTime: dt,
-        leftColour: lc,
-        rightColour: rc,
-        textColour: tc,
-    } = await getDaytimeAndColours({
-        forecastResponse: await forecastResponse,
-        theme: defaultTheme,
-    });
-
-    dayTime = dt;
-    leftColour = lc;
-    rightColour = rc;
-    textColour = tc;
-
     drawBackground(ctx);
     await drawCurrent(ctx, await weatherResponse, await forecastResponse);
 
-    return canvas.toDataURL();
+    if (!bufferOutput) {
+        return canvas.toDataURL();
+    } else {
+        return canvas.toBuffer('image/png');
+    }
 };
 
 const createWeatherImageTodayWithForecast = async (
     args: OpenWeatherArgs
 ): Promise<string | Buffer> => {
+    const { stateCode, countryCode, bufferOutput, imperialUnits } = args;
+
+    if (stateCode && !countryCode) {
+        throw `stateCode requires a countryCode provided with it`;
+    }
+
     const { weatherResponse, forecastResponse } = await grabData(args);
-    const { bufferOutput } = args;
 
-    const {
-        dayTime: dt,
-        leftColour: lc,
-        rightColour: rc,
-        textColour: tc,
-    } = await getDaytimeAndColours({
-        forecastResponse: await forecastResponse,
-        theme: defaultTheme,
-    });
-
-    dayTime = dt;
-    leftColour = lc;
-    rightColour = rc;
-    textColour = tc;
+    await setupVariables(forecastResponse, imperialUnits);
 
     const canvas = createCanvas(canvasWidth, canvasHeight);
     const ctx = canvas.getContext('2d');
@@ -146,8 +142,9 @@ const drawCurrent = async (
 
     leftPos = 22;
 
-    ctx.font = font(32);
-    ctx.fillText(`${name}, ${country}`, leftPos, 62);
+    const title: string = `${name}, ${country}`;
+    applyText(ctx, title, canvasWidth * (2 / 3) - leftPos, 32);
+    ctx.fillText(title, leftPos, 62);
 
     ctx.font = font(16);
     const { date, time } = timestampConverter(dt, timezone);
@@ -160,19 +157,19 @@ const drawCurrent = async (
     ctx.stroke();
 
     ctx.font = font(44);
-    const currentTemp: string = `${Math.round(temp)}°C`;
+    const currentTemp: string = `${Math.round(temp)}${tempUnit}`;
     const { width: tempWidth } = ctx.measureText(currentTemp);
     ctx.fillText(currentTemp, leftPos - 2, 145);
 
     ctx.font = font(16);
     ctx.fillText(
-        `Feels Like: ${Math.round(feels_like)}°C`,
+        `Feels Like: ${Math.round(feels_like)}${tempUnit}`,
         leftPos + tempWidth + 4,
         145
     );
 
     ctx.fillText(
-        `${Math.round(tempMin)}°C / ${Math.round(tempMax)}°C`,
+        `${Math.round(tempMin)}${tempUnit} / ${Math.round(tempMax)}${tempUnit}`,
         leftPos,
         167.5
     );
@@ -193,16 +190,24 @@ const drawCurrent = async (
     const { time: sunrise } = timestampConverter(sunriseDT, timezone);
     const { time: sunset } = timestampConverter(sunsetDT, timezone);
 
-    ctx.fillText(`Wind: ${wind_speed}km/h (${dir(wind_deg)})`, leftPos, 218);
+    const windSpeed: string = imperial
+        ? `${roundTo2(wind_speed)}mph`
+        : `${roundTo2(convertToKPH(wind_speed))}kph`;
+
+    ctx.fillText(`Wind: ${windSpeed} (${dir(wind_deg)})`, leftPos, 218);
     ctx.fillText(`Humidity: ${humidity}%`, leftPos, 233);
     ctx.fillText(`UV Index: ${uvi} (${uvIndexServeness(uvi)})`, leftPos, 248);
-    ctx.fillText(`Chance of Rain: ${pop * 100}%`, leftPos, 263);
+    ctx.fillText(`Chance of Rain: ${Math.round(pop * 100)}%`, leftPos, 263);
 
     const nextLeftPos = canvasWidth / 3 + 26;
     let upPosRain = 278;
 
     if (rainToday) {
-        ctx.fillText(`Today's Rain: ${rainToday}mm`, leftPos, upPosRain);
+        ctx.fillText(
+            `Today's Rain: ${rain(rainToday, imperial)}`,
+            leftPos,
+            upPosRain
+        );
         if (!rainCurrent) {
             upPosRain += 15;
         }
@@ -210,7 +215,7 @@ const drawCurrent = async (
 
     if (rainCurrent) {
         ctx.fillText(
-            `Rain Last Hour: ${rainCurrent['1h']}mm`,
+            `Rain Last Hour: ${rain(rainCurrent['1h'], imperial)}`,
             nextLeftPos - 15,
             upPosRain
         );
@@ -218,12 +223,16 @@ const drawCurrent = async (
     }
 
     if (snowToday) {
-        ctx.fillText(`Today's Snow: ${snowToday}mm`, leftPos, upPosRain);
+        ctx.fillText(
+            `Today's Snow: ${rain(snowToday, imperial)}`,
+            leftPos,
+            upPosRain
+        );
     }
 
     if (snowCurrent) {
         ctx.fillText(
-            `Snow Last Hour: ${snowCurrent['1h']}mm`,
+            `Snow Last Hour: ${rain(snowCurrent['1h'], imperial)}`,
             nextLeftPos - 15,
             263
         );
@@ -309,7 +318,7 @@ const drawForecastBox = async (
     );
 
     ctx.fillText(
-        `${Math.round(min)}°C / ${Math.round(max)}°C`,
+        `${Math.round(min)}${tempUnit} / ${Math.round(max)}${tempUnit}`,
         centre,
         boxBottom - 6
     );
@@ -329,6 +338,29 @@ const drawBackground = (
         ctx.fillStyle = '#DDDDDD';
         ctx.fillRect(0, currentHeight, canvasWidth, canvasHeight);
     }
+};
+
+const setupVariables = async (
+    forecastResponse: any,
+    imperialUnits: boolean | undefined
+): Promise<void> => {
+    const {
+        dayTime: dt,
+        leftColour: lc,
+        rightColour: rc,
+        textColour: tc,
+    } = await getDaytimeAndColours({
+        forecastResponse: await forecastResponse,
+        theme: defaultTheme,
+    });
+
+    dayTime = dt;
+    leftColour = lc;
+    rightColour = rc;
+    textColour = tc;
+
+    imperial = imperialUnits ? true : false;
+    tempUnit = imperial ? '°F' : '°C';
 };
 
 export {

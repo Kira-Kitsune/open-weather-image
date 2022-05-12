@@ -1,8 +1,8 @@
 import axios, { AxiosError } from 'axios';
 import {
+    BaseOpenWeatherArgs,
     DaytimeAndColourArgs,
     DaytimeAndColours,
-    OpenWeatherArgs,
     TimeLocalised,
 } from './types';
 import path = require('path');
@@ -83,23 +83,29 @@ export const capitaliseFirstLetter = (string: string): string => {
     return string.charAt(0).toUpperCase() + string.slice(1);
 };
 
+export const convertToKPH = (metrePerSec: number): number => {
+    return metrePerSec * 3.6;
+};
+
 export const grabData = async (
-    args: OpenWeatherArgs
+    args: BaseOpenWeatherArgs
 ): Promise<{ weatherResponse: any; forecastResponse: any }> => {
-    const { key, cityName, stateCode, countryCode } = args;
+    const { key, cityName, stateCode, countryCode, imperialUnits } = args;
+
+    const units: string = imperialUnits ? `imperial` : `metric`;
 
     let query: string = cityName;
     if (stateCode) query += ',' + stateCode;
     if (countryCode) query += ',' + countryCode;
 
-    const WEATHER_URL = `https://api.openweathermap.org/data/2.5/weather?q=${query}&appid=${key}&units=metric&lang={en}`;
+    const WEATHER_URL = `https://api.openweathermap.org/data/2.5/weather?q=${query}&appid=${key}&units=${units}&lang={en}`;
 
     const weatherResponse = await getResponse(WEATHER_URL);
 
     const { coord } = await weatherResponse;
     const { lat, lon } = coord;
 
-    const FORECAST_URL = `https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&exclude=minutely,hourly&appid=${key}&units=metric&lang={en}`;
+    const FORECAST_URL = `https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&exclude=minutely,hourly,alerts&appid=${key}&units=${units}&lang={en}`;
     const forecastResponse = await getResponse(FORECAST_URL);
 
     return { weatherResponse, forecastResponse };
@@ -134,4 +140,30 @@ export const getDaytimeAndColours = async (
         leftColour,
         rightColour,
     };
+};
+
+export const applyText = (
+    ctx: CanvasRenderingContext2D,
+    text: string,
+    areaWidth: number,
+    fontSize: number
+) => {
+    do {
+        ctx.font = font(fontSize);
+        fontSize -= 2;
+    } while (ctx.measureText(text).width > areaWidth);
+
+    return ctx.font;
+};
+
+export const roundTo2 = (number: number): number => {
+    return parseFloat(number.toFixed(2));
+};
+
+const mmToIn = (number: number): number => {
+    return number / 25.4;
+};
+
+export const rain = (rainVolume: number, imperial: boolean) => {
+    return imperial ? `${roundTo2(mmToIn(rainVolume))}in` : `${rainVolume}mm`;
 };
