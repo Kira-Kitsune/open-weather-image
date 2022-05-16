@@ -1,4 +1,5 @@
-import { createCanvas, CanvasRenderingContext2D, loadImage } from 'canvas';
+import { createCanvas, SKRSContext2D, Image } from '@napi-rs/canvas';
+import { readFile } from 'fs/promises';
 import {
     icon,
     uvIndexServeness,
@@ -58,11 +59,7 @@ const createWeatherImageToday = async (
     drawBackground(ctx);
     await drawCurrent(ctx, await weatherResponse, await forecastResponse);
 
-    if (!bufferOutput) {
-        return canvas.toDataURL();
-    } else {
-        return canvas.toBuffer('image/png');
-    }
+    return bufferOutput ? canvas.toBuffer('image/png') : canvas.toDataURL();
 };
 
 const createWeatherImageTodayWithForecast = async (
@@ -85,15 +82,11 @@ const createWeatherImageTodayWithForecast = async (
     await drawCurrent(ctx, await weatherResponse, await forecastResponse);
     await drawForecast(ctx, await forecastResponse);
 
-    if (!bufferOutput) {
-        return canvas.toDataURL();
-    } else {
-        return canvas.toBuffer('image/png');
-    }
+    return bufferOutput ? canvas.toBuffer('image/png') : canvas.toDataURL();
 };
 
 const drawCurrent = async (
-    ctx: CanvasRenderingContext2D,
+    ctx: SKRSContext2D,
     weatherResponse: any,
     forecastResponse: any
 ): Promise<void> => {
@@ -131,9 +124,11 @@ const drawCurrent = async (
 
     let leftPos: number;
 
-    const imgToday = dayTime
-        ? await loadImage(icon(iconToday))
-        : await loadImage(icon(iconToday.replace('d', 'n')));
+    const imgTodayFile = dayTime
+        ? await readFile(icon(iconToday))
+        : await readFile(icon(iconToday.replace('d', 'n')));
+    const imgToday = new Image();
+    imgToday.src = imgTodayFile;
 
     ctx.drawImage(imgToday, 383.333, 100, 100, 100);
 
@@ -177,7 +172,10 @@ const drawCurrent = async (
     ctx.font = font(16);
     ctx.fillText(capitaliseFirstLetter(description), 48, 191);
 
-    const imgCurrent = await loadImage(icon(iconCurrent));
+    const imgCurrentFile = await readFile(await icon(iconCurrent));
+    const imgCurrent = new Image();
+    imgCurrent.src = imgCurrentFile;
+
     ctx.drawImage(imgCurrent, leftPos, 174, 22, 22);
 
     ctx.beginPath();
@@ -238,17 +236,27 @@ const drawCurrent = async (
         );
     }
 
-    const imgSunrise = await loadImage(icon(dayTime ? 'sunrised' : 'sunrisen'));
+    const imgSunriseFile = await readFile(
+        await icon(dayTime ? 'sunrised' : 'sunrisen')
+    );
+    const imgSunrise = new Image();
+    imgSunrise.src = imgSunriseFile;
+
+    const imgSunsetFile = await readFile(
+        await icon(dayTime ? 'sunsetd' : 'sunsetn')
+    );
+    const imgSunset = new Image();
+    imgSunset.src = imgSunsetFile;
+
     ctx.drawImage(imgSunrise, nextLeftPos, 204, 44, 22);
     ctx.fillText(sunrise, nextLeftPos + 52, 221);
 
-    const imgSunset = await loadImage(icon(dayTime ? 'sunsetd' : 'sunsetn'));
     ctx.drawImage(imgSunset, nextLeftPos, 234, 44, 22);
     ctx.fillText(sunset, nextLeftPos + 52, 251);
 };
 
 const drawForecast = async (
-    ctx: CanvasRenderingContext2D,
+    ctx: SKRSContext2D,
     forecastResponse: any
 ): Promise<void> => {
     const { daily, timezone } = forecastResponse;
@@ -259,7 +267,7 @@ const drawForecast = async (
 };
 
 const drawForecastBox = async (
-    ctx: CanvasRenderingContext2D,
+    ctx: SKRSContext2D,
     dayForecast: any,
     timezone: string,
     boxNum: number
@@ -306,7 +314,10 @@ const drawForecastBox = async (
     ctx.fillText(date, centre, (topPos += 12), boxWidth - sidePadding * 2);
 
     topPos += 12;
-    const imgForecast = await loadImage(icon(forecastIcon));
+
+    const imgForecastFile = await readFile(await icon(forecastIcon));
+    const imgForecast = new Image();
+    imgForecast.src = imgForecastFile;
     ctx.drawImage(imgForecast, centre - 20, topPos, 40, 40);
 
     ctx.font = font(10);
@@ -325,7 +336,7 @@ const drawForecastBox = async (
 };
 
 const drawBackground = (
-    ctx: CanvasRenderingContext2D,
+    ctx: SKRSContext2D,
     forecast: boolean = false
 ): void => {
     ctx.fillStyle = leftColour;

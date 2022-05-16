@@ -5,7 +5,7 @@ import {
     DaytimeAndColours,
     TimeLocalised,
 } from './types';
-import path = require('path');
+import { SKRSContext2D } from '@napi-rs/canvas';
 
 const getResponse = async (URL: string): Promise<any> => {
     return await axios
@@ -17,7 +17,7 @@ const getResponse = async (URL: string): Promise<any> => {
 };
 
 export const icon = (iconCode: string): string => {
-    return path.join(__dirname, `../svg/${iconCode}.svg`);
+    return `./src/png/${iconCode}.png`;
 };
 
 export const uvIndexServeness = (uvIndex: number): string => {
@@ -143,7 +143,7 @@ export const getDaytimeAndColours = async (
 };
 
 export const applyText = (
-    ctx: CanvasRenderingContext2D,
+    ctx: SKRSContext2D,
     text: string,
     areaWidth: number,
     fontSize: number
