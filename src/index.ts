@@ -172,7 +172,7 @@ const drawCurrent = async (
     ctx.font = font(16);
     ctx.fillText(capitaliseFirstLetter(description), 48, 191);
 
-    const imgCurrentFile = await readFile(await icon(iconCurrent));
+    const imgCurrentFile = await readFile(icon(iconCurrent));
     const imgCurrent = new Image();
     imgCurrent.src = imgCurrentFile;
 
@@ -237,14 +237,12 @@ const drawCurrent = async (
     }
 
     const imgSunriseFile = await readFile(
-        await icon(dayTime ? 'sunrised' : 'sunrisen')
+        icon(dayTime ? 'sunrised' : 'sunrisen')
     );
     const imgSunrise = new Image();
     imgSunrise.src = imgSunriseFile;
 
-    const imgSunsetFile = await readFile(
-        await icon(dayTime ? 'sunsetd' : 'sunsetn')
-    );
+    const imgSunsetFile = await readFile(icon(dayTime ? 'sunsetd' : 'sunsetn'));
     const imgSunset = new Image();
     imgSunset.src = imgSunsetFile;
 
@@ -315,7 +313,7 @@ const drawForecastBox = async (
 
     topPos += 12;
 
-    const imgForecastFile = await readFile(await icon(forecastIcon));
+    const imgForecastFile = await readFile(icon(forecastIcon));
     const imgForecast = new Image();
     imgForecast.src = imgForecastFile;
     ctx.drawImage(imgForecast, centre - 20, topPos, 40, 40);
