@@ -18,7 +18,7 @@ const getResponse = async (URL: string): Promise<any> => {
 };
 
 export const icon = (iconCode: string): string => {
-    return join(__dirname + `../png/${iconCode}.png`);
+    return join(__dirname, `../png/${iconCode}.png`);
 };
 
 export const uvIndexServeness = (uvIndex: number): string => {
