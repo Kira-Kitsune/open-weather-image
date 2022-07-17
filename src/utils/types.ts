@@ -23,12 +23,14 @@ export interface OpenWeatherArgs extends BaseOpenWeatherArgs {
     bufferOutput?: boolean;
 }
 
+export type TempUnit = 'metric' | 'imperial';
+
 export interface BaseOpenWeatherArgs {
     key: string;
     cityName: string;
     stateCode?: string;
     countryCode?: string;
-    imperialUnits?: boolean;
+    tempUnit?: TempUnit;
 }
 
 export interface DaytimeAndColourArgs {
