@@ -15,6 +15,7 @@ import {
     rain,
     GeocodingResponse,
     isImperial,
+    getTempUnitForCountry,
 } from './utils/helperFunctions';
 import { OpenWeatherArgs, Theme, TempUnit } from './utils/types';
 
@@ -59,7 +60,7 @@ const createWeatherImageToday = async (
         await setupVariables(forecastResponse, tempUnit);
     }
     else {
-        await setupVariables(forecastResponse, ['US'].includes(geocodedCountryCode) ? 'imperial' : 'metric' );
+        await setupVariables(forecastResponse, getTempUnitForCountry(geocodedCountryCode));
     }
 
     const canvas = createCanvas(canvasWidth, currentHeight);
@@ -88,7 +89,7 @@ const createWeatherImageTodayWithForecast = async (
         await setupVariables(forecastResponse, tempUnit);
     }
     else {
-        await setupVariables(forecastResponse, ['US'].includes(geocodedCountryCode) ? 'imperial' : 'metric' );
+        await setupVariables(forecastResponse, getTempUnitForCountry(geocodedCountryCode));
     }
 
     const canvas = createCanvas(canvasWidth, canvasHeight);
@@ -152,7 +153,7 @@ const drawCurrent = async (
 
     leftPos = 22;
 
-    const title: string = `${name}, ${state ? state + ',' : ''} ${country}`;
+    const title: string = `${name}, ${state ? state : country}`;
     applyText(ctx, title, canvasWidth * (2 / 3) - leftPos, 32);
     ctx.fillText(title, leftPos, 62);
 
