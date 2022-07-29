@@ -6,7 +6,7 @@
     "types": "dist/index.d.ts",
     "scripts": {
         "build": "tsc",
-        "prepare": "npm run build && cp -r ./src/svg ./dist/"
+        "prepare": "npm run build && ncp ./src/svg ./dist/svg"
     },
     "repository": {
         "type": "git",
@@ -36,6 +36,7 @@
         "dist/**/*"
     ],
     "devDependencies": {
+        "ncp": "^2.0.0",
         "typescript": "^4.7.3"
     },
     "dependencies": {
