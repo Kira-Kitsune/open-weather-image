@@ -9,7 +9,7 @@ import {
 import { join } from 'path';
 import { SKRSContext2D } from '@napi-rs/canvas';
 
-const FAHRENHEIT_PREFERRED_COUNTRYS =
+const FAHRENHEIT_PREFERRED_COUNTRIES =
     ['US', 'LR', 'BS', 'BZ', 'FM', 'AG', 'KY', 'BM', 'KN', 'TC', 'MH', 'VI', 'PW', 'MS'];
 
 const getResponse = async (URL: string): Promise<any> => {
@@ -186,7 +186,7 @@ export const rain = (rainVolume: number, tempUnit: TempUnit) => {
 };
 
 export const getTempUnitForCountry = (country: string): TempUnit => {
-    return FAHRENHEIT_PREFERRED_COUNTRYS.includes(country) ? 'imperial' : 'metric'
+    return FAHRENHEIT_PREFERRED_COUNTRIES.includes(country) ? 'imperial' : 'metric'
 }
 
 export const isImperial = (tempUnit: TempUnit): boolean => {
