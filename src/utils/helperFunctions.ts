@@ -9,6 +9,9 @@ import {
 import { join } from 'path';
 import { SKRSContext2D } from '@napi-rs/canvas';
 
+const FAHRENHEIT_PREFERRED_COUNTRYS =
+    ['US', 'LR', 'BS', 'BZ', 'FM', 'AG', 'KY', 'BM', 'KN', 'TC', 'MH', 'VI', 'PW', 'MS'];
+
 const getResponse = async (URL: string): Promise<any> => {
     return await axios
         .get(URL)
@@ -107,8 +110,7 @@ export const grabData = async (
     if (stateCode) query += ',' + stateCode;
     if (countryCode) query += ',' + countryCode;
 
-    // const WEATHER_URL = `https://api.openweathermap.org/data/2.5/weather?q=${query}&appid=${key}&units=${units}&lang={en}`;
-    const GEOCODING_URL = `http://api.openweathermap.org/geo/1.0/direct?q=${query}&appid=${key}`; // &limit={limit}
+    const GEOCODING_URL = `http://api.openweathermap.org/geo/1.0/direct?q=${query}&appid=${key}&limit=1`;
 
     const geocodingResponse: GeocodingResponse[] = await getResponse(GEOCODING_URL);
 
@@ -118,7 +120,7 @@ export const grabData = async (
 
     const { lat, lon, country } = geocodingResponse[0];
 
-    let tempUnitToUse = tempUnit || (['US'].includes(country) ? 'imperial' : 'metric')
+    let tempUnitToUse = tempUnit || getTempUnitForCountry(country);
 
     const FORECAST_URL = `https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&exclude=minutely,hourly,alerts&appid=${key}&units=${tempUnitToUse}&lang={en}`;
     const forecastResponse = await getResponse(FORECAST_URL);
@@ -184,7 +186,7 @@ export const rain = (rainVolume: number, tempUnit: TempUnit) => {
 };
 
 export const getTempUnitForCountry = (country: string): TempUnit => {
-    return ['US'].includes(country) ? 'imperial' : 'metric'
+    return FAHRENHEIT_PREFERRED_COUNTRYS.includes(country) ? 'imperial' : 'metric'
 }
 
 export const isImperial = (tempUnit: TempUnit): boolean => {

@@ -31,7 +31,7 @@ With Metric Units
 import { createWeatherImageToday } from 'open-weather-image'
 
 const image = await createWeatherImageToday({ 
-    key: 'YOUR API KEY', cityName: 'Adelaide' 
+    key: 'YOUR API KEY', cityName: 'Adelaide', tempUnit: 'metric'
 })
 ```
 
@@ -41,9 +41,12 @@ import { createWeatherImageToday } from 'open-weather-image'
 
 const image = await createWeatherImageToday({ 
     key: 'YOUR API KEY', cityName: 'Springfield', stateCode: 'OR', 
-    countryCode: 'US', imperialUnits: true 
+    countryCode: 'US', tempUnit: 'imperial'
 })
 ```
+
+> Omitting the `tempUnit` property will use the preferred temperature
+unit of the target country.
 
 With Forecast
 ```ts

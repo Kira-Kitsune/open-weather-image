@@ -37,7 +37,7 @@ const canvasHeight: number = currentHeight + forecastHeight;
 let dayTime: boolean;
 
 let tempUnit: TempUnit;
-let tempUnitDegrees: string;
+let tempLabel: string;
 
 let leftColour: string;
 let rightColour: string;
@@ -168,19 +168,19 @@ const drawCurrent = async (
     ctx.stroke();
 
     ctx.font = font(44);
-    const currentTemp: string = `${Math.round(temp)}${tempUnitDegrees}`;
+    const currentTemp: string = `${Math.round(temp)}${tempLabel}`;
     const { width: tempWidth } = ctx.measureText(currentTemp);
     ctx.fillText(currentTemp, leftPos - 2, 145);
 
     ctx.font = font(16);
     ctx.fillText(
-        `Feels Like: ${Math.round(feels_like)}${tempUnitDegrees}`,
+        `Feels Like: ${Math.round(feels_like)}${tempLabel}`,
         leftPos + tempWidth + 4,
         145
     );
 
     ctx.fillText(
-        `${Math.round(tempMin)}${tempUnitDegrees} / ${Math.round(tempMax)}${tempUnitDegrees}`,
+        `${Math.round(tempMin)}${tempLabel} / ${Math.round(tempMax)}${tempLabel}`,
         leftPos,
         167.5
     );
@@ -384,7 +384,7 @@ const setupVariables = async (
     rightColour = rc;
     textColour = tc;
 
-    tempUnitDegrees = isImperial(tempUnit) ? '°F' : '°C';
+    tempLabel = isImperial(tempUnit) ? '°F' : '°C';
 };
 
 export {
