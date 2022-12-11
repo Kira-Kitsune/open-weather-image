@@ -3,10 +3,14 @@ import {
     BaseOpenWeatherArgs,
     DaytimeAndColourArgs,
     DaytimeAndColours,
+    TempUnit,
     TimeLocalised,
 } from './types';
 import { join } from 'path';
 import { SKRSContext2D } from '@napi-rs/canvas';
+
+const FAHRENHEIT_PREFERRED_COUNTRIES =
+    ['US', 'LR', 'BS', 'BZ', 'FM', 'AG', 'KY', 'BM', 'KN', 'TC', 'MH', 'VI', 'PW', 'MS'];
 
 const getResponse = async (URL: string): Promise<any> => {
     return await axios
@@ -88,28 +92,40 @@ export const convertToKPH = (metrePerSec: number): number => {
     return metrePerSec * 3.6;
 };
 
+export interface GeocodingResponse {
+    name: string;
+    local_names: {[lang: string]: string};
+    lat: number;
+    lon: number;
+    country: string;
+    state: string;
+}
+
 export const grabData = async (
     args: BaseOpenWeatherArgs
-): Promise<{ weatherResponse: any; forecastResponse: any }> => {
-    const { key, cityName, stateCode, countryCode, imperialUnits } = args;
-
-    const units: string = imperialUnits ? `imperial` : `metric`;
+): Promise<{ geocodingResponse: GeocodingResponse; forecastResponse: any }> => {
+    const { key, cityName, stateCode, countryCode, tempUnit } = args;
 
     let query: string = cityName;
     if (stateCode) query += ',' + stateCode;
     if (countryCode) query += ',' + countryCode;
 
-    const WEATHER_URL = `https://api.openweathermap.org/data/2.5/weather?q=${query}&appid=${key}&units=${units}&lang={en}`;
+    const GEOCODING_URL = `http://api.openweathermap.org/geo/1.0/direct?q=${query}&appid=${key}&limit=1`;
 
-    const weatherResponse = await getResponse(WEATHER_URL);
+    const geocodingResponse: GeocodingResponse[] = await getResponse(GEOCODING_URL);
 
-    const { coord } = await weatherResponse;
-    const { lat, lon } = coord;
+    if (geocodingResponse.length === 0) {
+        throw `could not find location`
+    }
 
-    const FORECAST_URL = `https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&exclude=minutely,hourly,alerts&appid=${key}&units=${units}&lang={en}`;
+    const { lat, lon, country } = geocodingResponse[0];
+
+    let tempUnitToUse = tempUnit || getTempUnitForCountry(country);
+
+    const FORECAST_URL = `https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&exclude=minutely,hourly,alerts&appid=${key}&units=${tempUnitToUse}&lang={en}`;
     const forecastResponse = await getResponse(FORECAST_URL);
 
-    return { weatherResponse, forecastResponse };
+    return { geocodingResponse: geocodingResponse[0], forecastResponse };
 };
 
 export const getDaytimeAndColours = async (
@@ -165,6 +181,14 @@ const mmToIn = (number: number): number => {
     return number / 25.4;
 };
 
-export const rain = (rainVolume: number, imperial: boolean) => {
-    return imperial ? `${roundTo2(mmToIn(rainVolume))}in` : `${rainVolume}mm`;
+export const rain = (rainVolume: number, tempUnit: TempUnit) => {
+    return isImperial(tempUnit) ? `${roundTo2(mmToIn(rainVolume))}in` : `${rainVolume}mm`;
 };
+
+export const getTempUnitForCountry = (country: string): TempUnit => {
+    return FAHRENHEIT_PREFERRED_COUNTRIES.includes(country) ? 'imperial' : 'metric'
+}
+
+export const isImperial = (tempUnit: TempUnit): boolean => {
+    return tempUnit === 'imperial';
+}
