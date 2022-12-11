@@ -12,6 +12,9 @@
         "type": "git",
         "url": "https://github.com/Kira-Kitsune/open-weather-image.git"
     },
+    "publishConfig": {
+        "registry": "https://npm.pkg.github.com"
+    },
     "keywords": [
         "weather",
         "openweather",
