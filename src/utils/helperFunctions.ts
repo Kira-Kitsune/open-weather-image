@@ -4,15 +4,15 @@ import {
     DaytimeAndColourArgs,
     DaytimeAndColours,
     TempUnit,
+    GeocodingResponse,
     TimeLocalised,
 } from './types';
 import { join } from 'path';
 import { SKRSContext2D } from '@napi-rs/canvas';
 
-const FAHRENHEIT_PREFERRED_COUNTRIES =
-    ['US', 'LR', 'BS', 'BZ', 'FM', 'AG', 'KY', 'BM', 'KN', 'TC', 'MH', 'VI', 'PW', 'MS'];
+const FAHRENHEIT_PREFERRED_COUNTRIES = ['US', 'LR', 'MM'];
 
-const getResponse = async (URL: string): Promise<any> => {
+const getResponse = async (URL: string) => {
     return await axios
         .get(URL)
         .then((res) => res.data)
@@ -21,11 +21,11 @@ const getResponse = async (URL: string): Promise<any> => {
         );
 };
 
-export const icon = (iconCode: string): string => {
+export const icon = (iconCode: string) => {
     return join(__dirname, `../svg/${iconCode}.svg`);
 };
 
-export const uvIndexServeness = (uvIndex: number): string => {
+export const uvIndexServeness = (uvIndex: number) => {
     let uviServeness: string;
 
     if (uvIndex > 0 && uvIndex <= 2.5) uviServeness = 'Low';
@@ -38,7 +38,7 @@ export const uvIndexServeness = (uvIndex: number): string => {
     return uviServeness;
 };
 
-export const dir = (deg: number): string => {
+export const dir = (deg: number) => {
     let dir: string;
 
     if (deg >= 0 && deg < 22.5) dir = 'N';
@@ -55,7 +55,7 @@ export const dir = (deg: number): string => {
     return dir;
 };
 
-export const font = (size: number, name: string = 'Arial'): string => {
+export const font = (size: number, name: string = 'Arial') => {
     return `${size}px ${name}`;
 };
 
@@ -84,26 +84,15 @@ export const timestampConverter = (
     };
 };
 
-export const capitaliseFirstLetter = (string: string): string => {
+export const capitaliseFirstLetter = (string: string) => {
     return string.charAt(0).toUpperCase() + string.slice(1);
 };
 
-export const convertToKPH = (metrePerSec: number): number => {
+export const convertToKPH = (metrePerSec: number) => {
     return metrePerSec * 3.6;
 };
 
-export interface GeocodingResponse {
-    name: string;
-    local_names: {[lang: string]: string};
-    lat: number;
-    lon: number;
-    country: string;
-    state: string;
-}
-
-export const grabData = async (
-    args: BaseOpenWeatherArgs
-): Promise<{ geocodingResponse: GeocodingResponse; forecastResponse: any }> => {
+export const grabData = async (args: BaseOpenWeatherArgs) => {
     const { key, cityName, stateCode, countryCode, tempUnit } = args;
 
     let query: string = cityName;
@@ -112,10 +101,12 @@ export const grabData = async (
 
     const GEOCODING_URL = `http://api.openweathermap.org/geo/1.0/direct?q=${query}&appid=${key}&limit=1`;
 
-    const geocodingResponse: GeocodingResponse[] = await getResponse(GEOCODING_URL);
+    const geocodingResponse: GeocodingResponse[] = await getResponse(
+        GEOCODING_URL
+    );
 
     if (geocodingResponse.length === 0) {
-        throw `could not find location`
+        throw `Could not find location`;
     }
 
     const { lat, lon, country } = geocodingResponse[0];
@@ -140,6 +131,12 @@ export const getDaytimeAndColours = async (
     let textColour: string;
     let leftColour: string;
     let rightColour: string;
+    const {
+        forecastBgTheme,
+        forecastBoxTheme,
+        forecastText,
+        forecastBoxDivider,
+    } = theme;
 
     if (dayTime) {
         textColour = theme.dayThemeText;
@@ -156,6 +153,10 @@ export const getDaytimeAndColours = async (
         textColour,
         leftColour,
         rightColour,
+        forecastBgTheme,
+        forecastBoxTheme,
+        forecastText,
+        forecastBoxDivider,
     };
 };
 
@@ -182,13 +183,17 @@ const mmToIn = (number: number): number => {
 };
 
 export const rain = (rainVolume: number, tempUnit: TempUnit) => {
-    return isImperial(tempUnit) ? `${roundTo2(mmToIn(rainVolume))}in` : `${rainVolume}mm`;
+    return isImperial(tempUnit)
+        ? `${roundTo2(mmToIn(rainVolume))}in`
+        : `${rainVolume}mm`;
 };
 
 export const getTempUnitForCountry = (country: string): TempUnit => {
-    return FAHRENHEIT_PREFERRED_COUNTRIES.includes(country) ? 'imperial' : 'metric'
-}
+    return FAHRENHEIT_PREFERRED_COUNTRIES.includes(country)
+        ? 'imperial'
+        : 'metric';
+};
 
-export const isImperial = (tempUnit: TempUnit): boolean => {
+export const isImperial = (tempUnit: TempUnit) => {
     return tempUnit === 'imperial';
-}
+};

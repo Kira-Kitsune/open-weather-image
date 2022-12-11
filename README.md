@@ -14,6 +14,10 @@ Or alternatively you can include it with a forecast
 
 ![WithForecast](https://github.com/Kira-Kitsune/open-weather-image/blob/main/withforecast.png?raw=true)
 
+Optionally if you don't like the default colours, you can customise the theme (Only with solid colours, gradients will be added in future version)
+
+> The icons are not affected currently (daytime - black, nighttime - white)
+
 # Installation
 
 ```sh
@@ -27,35 +31,71 @@ First you will need to register and account on OpenWeather to obtain an API key
 [How to Start OpenWeather](https://openweathermap.org/appid)
 
 With Metric Units
-```ts
-import { createWeatherImageToday } from 'open-weather-image'
 
-const image = await createWeatherImageToday({ 
-    key: 'YOUR API KEY', cityName: 'Adelaide', tempUnit: 'metric'
-})
+```ts
+import { createWeatherImage } from 'open-weather-image';
+
+const image = await createWeatherImageToday({
+    key: 'YOUR API KEY',
+    cityName: 'Adelaide',
+    tempUnit: 'metric',
+});
 ```
 
 With Imperial Units
-```ts
-import { createWeatherImageToday } from 'open-weather-image'
 
-const image = await createWeatherImageToday({ 
-    key: 'YOUR API KEY', cityName: 'Springfield', stateCode: 'OR', 
-    countryCode: 'US', tempUnit: 'imperial'
-})
+```ts
+import { createWeatherImage } from 'open-weather-image';
+
+const image = await createWeatherImageToday({
+    key: 'YOUR API KEY',
+    cityName: 'Springfield',
+    stateCode: 'OR',
+    countryCode: 'US',
+    tempUnit: 'imperial',
+});
 ```
 
-> Omitting the `tempUnit` property will use the preferred temperature
-unit of the target country.
+> Omitting the `tempUnit` property will use the preferred temperature unit of the target country.
 
 With Forecast
-```ts
-import { createWeatherImageTodayWithForecast } from 'open-weather-image'
 
-const image = await createWeatherImageTodayWithForecast({ 
-    key: 'YOUR API KEY', cityName: 'Adelaide'
-})
+```ts
+import { createWeatherImage } from 'open-weather-image';
+
+const image = await createWeatherImage({
+    key: 'YOUR API KEY',
+    cityName: 'Adelaide',
+    withForecast: true,
+});
 ```
+
+With a Theme
+
+```ts
+import { createWeatherImage, Theme } from 'open-weather-image';
+
+const myTheme = new Theme({
+    dayThemeRight: '#373CC4',
+    forecastBgTheme: '#242424',
+    forecastBoxDivider: '#FFFFFF',
+});
+
+const image = await createWeatherImage({
+    key: 'YOUR API KEY',
+    cityName: 'Adelaide',
+    withForecast: true,
+    theme: myTheme,
+});
+```
+
+Result:
+![WithTheme](https://github.com/Kira-Kitsune/open-weather-image/blob/main/withtheme.png?raw=true)
+
+# Contributing
+
+Before creating an issue, please ensure that it hasn't already been reported/suggested.
+You are free to submit a PR to this repo, please fork first.
 
 # License
 

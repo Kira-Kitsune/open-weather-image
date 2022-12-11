@@ -36,14 +36,12 @@
         "dist/**/*"
     ],
     "devDependencies": {
+        "@types/node": "^18.11.13",
         "ncp": "^2.0.0",
         "typescript": "^4.7.3"
     },
     "dependencies": {
-        "@napi-rs/canvas": "^0.1.22",
-        "axios": "^0.27.2"
-    },
-    "optionalDependencies": {
-        "@types/whatwg-url": "^8.2.1"
+        "@napi-rs/canvas": "^0.1.30",
+        "axios": "^1.2.1"
     }
 }
