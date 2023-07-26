@@ -1,19 +1,20 @@
-import { Theme } from './theme';
-
 export type TimeLocalised = {
     date: string;
     time: string;
 };
 
-export interface ThemeInput {
+export interface Theme {
     dayThemeLeft?: string;
     dayThemeRight?: string;
     dayThemeText?: string;
+    dayThemeSymbol?: string;
     nightThemeLeft?: string;
     nightThemeRight?: string;
     nightThemeText?: string;
+    nightThemeSymbol?: string;
     forecastBgTheme?: string;
     forecastBoxTheme?: string;
+    forecastSymbolColour?: string;
     forecastText?: string;
     forecastBoxDivider?: string;
 }
@@ -23,10 +24,12 @@ export type DaytimeAndColours = {
     textColour: string;
     leftColour: string;
     rightColour: string;
+    symbolColour: string;
     forecastBgTheme: string;
     forecastBoxTheme: string;
     forecastText: string;
     forecastBoxDivider: string;
+    forecastSymbolColour: string;
 };
 
 export interface OpenWeatherArgs extends BaseOpenWeatherArgs {

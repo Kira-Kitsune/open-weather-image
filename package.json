@@ -6,7 +6,7 @@
     "types": "dist/index.d.ts",
     "scripts": {
         "build": "tsc",
-        "prepare": "npm run build && ncp ./src/svg ./dist/svg"
+        "prepare": "npm run build && ncp ./src/weathericons-font.ttf ./dist/weathericons-font.ttf"
     },
     "repository": {
         "type": "git",
@@ -36,12 +36,12 @@
         "dist/**/*"
     ],
     "devDependencies": {
-        "@types/node": "^18.11.13",
+        "@types/node": "^18.16.19",
         "ncp": "^2.0.0",
-        "typescript": "^4.7.3"
+        "typescript": "^5.1.6"
     },
     "dependencies": {
-        "@napi-rs/canvas": "^0.1.30",
-        "axios": "^1.2.1"
+        "@napi-rs/canvas": "^0.1.41",
+        "axios": "^1.4.0"
     }
 }

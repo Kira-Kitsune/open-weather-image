@@ -1,4 +1,9 @@
-import { createCanvas, SKRSContext2D, Image } from '@napi-rs/canvas';
+import {
+    createCanvas,
+    SKRSContext2D,
+    Image,
+    GlobalFonts,
+} from '@napi-rs/canvas';
 import { readFile } from 'fs/promises';
 import {
     icon,
@@ -16,13 +21,13 @@ import {
     isImperial,
     getTempUnitForCountry,
 } from './utils/helperFunctions';
-import { Theme } from './utils/theme';
 import {
     OpenWeatherArgs,
     GeocodingResponse,
     TempUnit,
-    ThemeInput,
+    Theme,
 } from './utils/types';
+import { join } from 'path';
 
 const currentHeight = 320;
 const forecastHeight = 140;
@@ -38,12 +43,15 @@ let tempLabel: string;
 let leftColour: string;
 let rightColour: string;
 let textColour: string;
+let symbolColour: string;
 
 let forecastBgColour: string;
 let forecastBoxColour: string;
 let forecastText: string;
 let forecastBoxDivider: string;
+let forecastSymbolColour: string;
 
+// Weather Icons font https://erikflowers.github.io/weather-icons/
 const createWeatherImage = async (args: OpenWeatherArgs) => {
     const {
         stateCode,
@@ -65,12 +73,19 @@ const createWeatherImage = async (args: OpenWeatherArgs) => {
     await setupVariables(
         forecastResponse,
         withForecast,
-        theme ? theme : new Theme(),
+        theme || {},
         tempUnit ? tempUnit : getTempUnitForCountry(geocodedCountryCode)
     );
 
     const canvas = createCanvas(canvasWidth, canvasHeight);
     const ctx = canvas.getContext('2d');
+
+    console.log(__dirname);
+
+    GlobalFonts.registerFromPath(
+        join(__dirname, 'weathericons-font.ttf'),
+        'Weather Icons'
+    );
 
     drawBackground(ctx, withForecast);
     await drawCurrent(ctx, geocodingResponse, forecastResponse);
@@ -115,20 +130,23 @@ const drawCurrent = async (
     const { icon: iconToday } = weatherToday[0];
 
     let leftPos: number;
+    ctx.textAlign = 'center';
+    ctx.fillStyle = symbolColour;
 
-    const imgTodayFile = dayTime
-        ? await readFile(icon(iconToday))
-        : await readFile(icon(iconToday.replace('d', 'n')));
-    const imgToday = new Image();
-    imgToday.src = imgTodayFile;
+    ctx.font = font(80, 'Weather Icons');
+    ctx.fillText(
+        icon(dayTime ? iconToday : iconToday.replace('d', 'n')),
+        canvasWidth * (2 / 3) + canvasWidth / 3 / 2,
+        currentHeight / 2 + 30
+    );
 
-    ctx.drawImage(imgToday, 383.333, 100, 100, 100);
-
+    ctx.textAlign = 'start';
     ctx.fillStyle = textColour;
     ctx.strokeStyle = textColour;
 
     leftPos = 22;
 
+    ctx.font = font(10);
     const title: string = `${name}, ${country}`;
     applyText(ctx, title, canvasWidth * (2 / 3) - leftPos, 32);
     ctx.fillText(title, leftPos, 62);
@@ -156,21 +174,18 @@ const drawCurrent = async (
     );
 
     ctx.fillText(
-        `${Math.round(tempMin)}${tempLabel} / ${Math.round(
-            tempMax
+        `${Math.round(tempMax)}${tempLabel} / ${Math.round(
+            tempMin
         )}${tempLabel}`,
         leftPos,
         167.5
     );
 
+    ctx.font = font(20, 'Weather Icons');
+    ctx.fillText(icon(iconCurrent), leftPos, 191);
+
     ctx.font = font(16);
-    ctx.fillText(capitaliseFirstLetter(description), 48, 191);
-
-    const imgCurrentFile = await readFile(icon(iconCurrent));
-    const imgCurrent = new Image();
-    imgCurrent.src = imgCurrentFile;
-
-    ctx.drawImage(imgCurrent, leftPos, 174, 22, 22);
+    ctx.fillText(capitaliseFirstLetter(description), 56, 191);
 
     ctx.beginPath();
     ctx.lineTo(15, 200);
@@ -230,21 +245,15 @@ const drawCurrent = async (
         );
     }
 
-    const imgSunriseFile = await readFile(
-        icon(dayTime ? 'sunrised' : 'sunrisen')
-    );
-    const imgSunrise = new Image();
-    imgSunrise.src = imgSunriseFile;
+    ctx.font = font(24, 'Weather Icons');
+    ctx.fillText('\uf051', nextLeftPos, 228);
+    ctx.font = font(12);
+    ctx.fillText(sunrise, nextLeftPos + 36, 221);
 
-    const imgSunsetFile = await readFile(icon(dayTime ? 'sunsetd' : 'sunsetn'));
-    const imgSunset = new Image();
-    imgSunset.src = imgSunsetFile;
-
-    ctx.drawImage(imgSunrise, nextLeftPos, 204, 44, 22);
-    ctx.fillText(sunrise, nextLeftPos + 52, 221);
-
-    ctx.drawImage(imgSunset, nextLeftPos, 234, 44, 22);
-    ctx.fillText(sunset, nextLeftPos + 52, 251);
+    ctx.font = font(24, 'Weather Icons');
+    ctx.fillText('\uf052', nextLeftPos, 258);
+    ctx.font = font(12);
+    ctx.fillText(sunset, nextLeftPos + 36, 251);
 };
 
 const drawForecast = async (ctx: SKRSContext2D, forecastResponse: any) => {
@@ -304,10 +313,9 @@ const drawForecastBox = async (
 
     topPos += 12;
 
-    const imgForecastFile = await readFile(icon(forecastIcon));
-    const imgForecast = new Image();
-    imgForecast.src = imgForecastFile;
-    ctx.drawImage(imgForecast, centre - 20, topPos, 40, 40);
+    ctx.fillStyle = forecastSymbolColour;
+    ctx.font = font(36, 'Weather Icons');
+    ctx.fillText(icon(forecastIcon), centre, topPos + 32);
 
     ctx.font = font(10);
     ctx.fillText(
@@ -351,10 +359,12 @@ const setupVariables = async (
         leftColour: lc,
         rightColour: rc,
         textColour: tc,
+        symbolColour: sc,
         forecastBgTheme: fbg,
         forecastBoxTheme: fbox,
         forecastText: ft,
         forecastBoxDivider: fboxd,
+        forecastSymbolColour: fsc,
     } = await getDaytimeAndColours({
         forecastResponse: await forecastResponse,
         theme,
@@ -364,10 +374,12 @@ const setupVariables = async (
     leftColour = lc;
     rightColour = rc;
     textColour = tc;
+    symbolColour = sc;
     forecastBgColour = fbg;
     forecastBoxColour = fbox;
     forecastText = ft;
     forecastBoxDivider = fboxd;
+    forecastSymbolColour = fsc;
 
     tempLabel = isImperial(tempUnit) ? '°F' : '°C';
 
@@ -376,4 +388,4 @@ const setupVariables = async (
         : currentHeight;
 };
 
-export { OpenWeatherArgs, createWeatherImage, ThemeInput, Theme };
+export { OpenWeatherArgs, createWeatherImage, Theme as ThemeInput, Theme };

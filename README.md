@@ -14,9 +14,7 @@ Or alternatively you can include it with a forecast
 
 ![WithForecast](https://github.com/Kira-Kitsune/open-weather-image/blob/main/withforecast.png?raw=true)
 
-Optionally if you don't like the default colours, you can customise the theme (Only with solid colours, gradients will be added in future version)
-
-> The icons are not affected currently (daytime - black, nighttime - white)
+Optionally if you don't like the default colours, you can customise the theme (Only with solid colours, all arguments are optional, gradients will be added in future version)
 
 # Installation
 
@@ -73,13 +71,15 @@ const image = await createWeatherImage({
 With a Theme
 
 ```ts
-import { createWeatherImage, Theme } from 'open-weather-image';
+import { createWeatherImage } from 'open-weather-image';
 
-const myTheme = new Theme({
+const myTheme = {
     dayThemeRight: '#373CC4',
     forecastBgTheme: '#242424',
     forecastBoxDivider: '#FFFFFF',
-});
+    dayThemeText: '#FF00FF',
+    dayThemeSymbol: '#00FF00',
+};
 
 const image = await createWeatherImage({
     key: 'YOUR API KEY',
@@ -89,7 +89,34 @@ const image = await createWeatherImage({
 });
 ```
 
+Importing the theme type (TypeScript)
+
+```ts
+import type { Theme } from 'open-weather-image';
+```
+
+Default Theme
+
+```ts
+const defaultTheme = {
+    dayThemeLeft: '#FFD982',
+    dayThemeRight: '#5ECEF6',
+    dayThemeText: 'black', // #000000
+    dayThemeSymbol: 'black',
+    nightThemeLeft: '#25395C',
+    nightThemeRight: '#1C2A4F',
+    nightThemeText: 'white', // #FFFFFF
+    nightThemeSymbol: 'white',
+    forecastBgTheme: '#DDDDDD',
+    forecastBoxTheme: '#EEEEEE',
+    forecastText: 'black',
+    forecastSymbolColour: 'black',
+    forecastBoxDivider: 'black',
+};
+```
+
 Result:
+
 ![WithTheme](https://github.com/Kira-Kitsune/open-weather-image/blob/main/withtheme.png?raw=true)
 
 # Contributing
@@ -101,4 +128,4 @@ You are free to submit a PR to this repo, please fork first.
 
 open-weather-image is available under the MIT license. See the LICENSE.md file for more info.
 
-Copyright &copy; 2022 Kira Kitsune <https://kirakitsune.com>, All rights reserved.
+Copyright &copy; 2022-2023 Kira Kitsune <https://kirakitsune.com>, All rights reserved.

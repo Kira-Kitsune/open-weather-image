@@ -22,7 +22,41 @@ const getResponse = async (URL: string) => {
 };
 
 export const icon = (iconCode: string) => {
-    return join(__dirname, `../svg/${iconCode}.svg`);
+    switch (iconCode) {
+        case '01d':
+            return '\uf00d';
+        case '01n':
+            return '\uf02e';
+        case '02d':
+            return '\uf002';
+        case '02n':
+            return '\uf086';
+        case '03d':
+        case '03n':
+            return '\uf041';
+        case '04d':
+        case '04n':
+            return '\uf013';
+        case '09d':
+            return '\uf009';
+        case '09n':
+            return '\uf029';
+        case '10d':
+        case '10n':
+            return '\uf019';
+        case '11d':
+        case '11n':
+            return '\uf01e';
+        case '13d':
+        case '13n':
+            return '\uf01b';
+        case '50d':
+            return '\uf003';
+        case '50n':
+            return '\uf04a';
+        default:
+            return '\uf07b';
+    }
 };
 
 export const uvIndexServeness = (uvIndex: number) => {
@@ -128,24 +162,38 @@ export const getDaytimeAndColours = async (
     const { dt, sunrise, sunset } = current;
 
     const dayTime = dt >= sunrise && dt < sunset;
+
+    const {
+        dayThemeLeft = '#FFD982',
+        dayThemeRight = '#5ECEF6',
+        dayThemeText = 'black',
+        dayThemeSymbol = 'black',
+        nightThemeLeft = '#25395C',
+        nightThemeRight = '#1C2A4F',
+        nightThemeText = 'white',
+        nightThemeSymbol = 'white',
+        forecastBgTheme = '#DDDDDD',
+        forecastBoxTheme = '#EEEEEE',
+        forecastText = 'black',
+        forecastSymbolColour = 'black',
+        forecastBoxDivider = 'black',
+    } = theme;
+
     let textColour: string;
     let leftColour: string;
     let rightColour: string;
-    const {
-        forecastBgTheme,
-        forecastBoxTheme,
-        forecastText,
-        forecastBoxDivider,
-    } = theme;
+    let symbolColour: string;
 
     if (dayTime) {
-        textColour = theme.dayThemeText;
-        leftColour = theme.dayThemeLeft;
-        rightColour = theme.dayThemeRight;
+        textColour = dayThemeText;
+        leftColour = dayThemeLeft;
+        rightColour = dayThemeRight;
+        symbolColour = dayThemeSymbol;
     } else {
-        textColour = theme.nightThemeText;
-        leftColour = theme.nightThemeLeft;
-        rightColour = theme.nightThemeRight;
+        textColour = nightThemeText;
+        leftColour = nightThemeLeft;
+        rightColour = nightThemeRight;
+        symbolColour = nightThemeSymbol;
     }
 
     return {
@@ -153,10 +201,12 @@ export const getDaytimeAndColours = async (
         textColour,
         leftColour,
         rightColour,
+        symbolColour,
         forecastBgTheme,
         forecastBoxTheme,
         forecastText,
         forecastBoxDivider,
+        forecastSymbolColour,
     };
 };
 
@@ -164,10 +214,11 @@ export const applyText = (
     ctx: SKRSContext2D,
     text: string,
     areaWidth: number,
-    fontSize: number
+    fontSize: number,
+    fontName?: string
 ) => {
     do {
-        ctx.font = font(fontSize);
+        ctx.font = font(fontSize, fontName);
         fontSize -= 2;
     } while (ctx.measureText(text).width > areaWidth);
 
