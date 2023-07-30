@@ -80,8 +80,6 @@ const createWeatherImage = async (args: OpenWeatherArgs) => {
     const canvas = createCanvas(canvasWidth, canvasHeight);
     const ctx = canvas.getContext('2d');
 
-    console.log(__dirname);
-
     GlobalFonts.registerFromPath(
         join(__dirname, 'weathericons-font.ttf'),
         'Weather Icons'

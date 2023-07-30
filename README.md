@@ -89,6 +89,10 @@ const image = await createWeatherImage({
 });
 ```
 
+Result:
+
+![WithTheme](https://github.com/Kira-Kitsune/open-weather-image/blob/main/withtheme.png?raw=true)
+
 Importing the theme type (TypeScript)
 
 ```ts
@@ -115,14 +119,10 @@ const defaultTheme = {
 };
 ```
 
-Result:
-
-![WithTheme](https://github.com/Kira-Kitsune/open-weather-image/blob/main/withtheme.png?raw=true)
-
 # Contributing
 
 Before creating an issue, please ensure that it hasn't already been reported/suggested.
-You are free to submit a PR to this repo, please fork first.
+You are free to submit a PR to this repo, please fork first, english and german is the preferred languages.
 
 # License
 
