@@ -1,33 +1,27 @@
+import { GlobalFonts, SKRSContext2D, createCanvas } from '@napi-rs/canvas';
+import { join } from 'path';
 import {
-    createCanvas,
-    SKRSContext2D,
-    Image,
-    GlobalFonts,
-} from '@napi-rs/canvas';
-import { readFile } from 'fs/promises';
-import {
-    icon,
-    uvIndexServeness,
+    applyText,
+    capitaliseFirstLetter,
+    convertToKPH,
     dir,
     font,
-    timestampConverter,
-    capitaliseFirstLetter,
-    grabData,
     getDaytimeAndColours,
-    convertToKPH,
-    applyText,
-    roundTo2,
-    rain,
-    isImperial,
     getTempUnitForCountry,
+    grabData,
+    icon,
+    isImperial,
+    rain,
+    roundTo2,
+    timestampConverter,
+    uvIndexServeness,
 } from './utils/helperFunctions';
 import {
-    OpenWeatherArgs,
     GeocodingResponse,
+    OpenWeatherArgs,
     TempUnit,
     Theme,
 } from './utils/types';
-import { join } from 'path';
 
 const currentHeight = 320;
 const forecastHeight = 140;
@@ -52,6 +46,12 @@ let forecastBoxDivider: string;
 let forecastSymbolColour: string;
 
 // Weather Icons font https://erikflowers.github.io/weather-icons/
+// TODO: Create localisation with language (German, French, etc.)
+/**
+ * Creates the image weather image, using data from OpenWeatherMap
+ * @param args The arguments for modifying the images and getting data.
+ * @returns
+ */
 const createWeatherImage = async (args: OpenWeatherArgs) => {
     const {
         stateCode,
@@ -324,7 +324,7 @@ const drawForecastBox = async (
     );
 
     ctx.fillText(
-        `${Math.round(min)}${tempLabel} / ${Math.round(max)}${tempLabel}`,
+        `${Math.round(max)}${tempLabel} / ${Math.round(min)}${tempLabel}`,
         centre,
         boxBottom - 6
     );
@@ -350,7 +350,7 @@ const setupVariables = async (
     forecastResponse: any,
     withForecast: boolean = false,
     theme: Theme,
-    tempUnit: TempUnit
+    tempU: TempUnit
 ) => {
     const {
         dayTime: dt,
@@ -379,11 +379,12 @@ const setupVariables = async (
     forecastBoxDivider = fboxd;
     forecastSymbolColour = fsc;
 
-    tempLabel = isImperial(tempUnit) ? '°F' : '°C';
+    tempUnit = tempU;
+    tempLabel = isImperial(tempU) ? '°F' : '°C';
 
     canvasHeight = withForecast
         ? currentHeight + forecastHeight
         : currentHeight;
 };
 
-export { OpenWeatherArgs, createWeatherImage, Theme as ThemeInput, Theme };
+export { OpenWeatherArgs, Theme, createWeatherImage };

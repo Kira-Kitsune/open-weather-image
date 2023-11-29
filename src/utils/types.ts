@@ -3,6 +3,9 @@ export type TimeLocalised = {
     time: string;
 };
 
+/**
+ * The styling and theming of the generated images.
+ */
 export interface Theme {
     dayThemeLeft?: string;
     dayThemeRight?: string;
@@ -32,6 +35,9 @@ export type DaytimeAndColours = {
     forecastSymbolColour: string;
 };
 
+/**
+ * The input into createWeatherImage
+ */
 export interface OpenWeatherArgs extends BaseOpenWeatherArgs {
     bufferOutput?: boolean;
     theme?: Theme;

@@ -7,7 +7,6 @@ import {
     GeocodingResponse,
     TimeLocalised,
 } from './types';
-import { join } from 'path';
 import { SKRSContext2D } from '@napi-rs/canvas';
 
 const FAHRENHEIT_PREFERRED_COUNTRIES = ['US', 'LR', 'MM'];

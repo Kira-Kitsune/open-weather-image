@@ -26,6 +26,8 @@ $ npm install open-weather-image
 
 First you will need to register and account on OpenWeather to obtain an API key
 
+Recommended to put your API key as an environment variable.
+
 [How to Start OpenWeather](https://openweathermap.org/appid)
 
 With Metric Units
@@ -34,7 +36,7 @@ With Metric Units
 import { createWeatherImage } from 'open-weather-image';
 
 const image = await createWeatherImageToday({
-    key: 'YOUR API KEY',
+    key: process.env.WEATHER_API_KEY,
     cityName: 'Adelaide',
     tempUnit: 'metric',
 });
@@ -42,11 +44,15 @@ const image = await createWeatherImageToday({
 
 With Imperial Units
 
+![Imperial](https://github.com/Kira-Kitsune/open-weather-image/blob/main/imperial.png?raw=true)
+
+Note: if a country by default uses Imperial or Metric units, it will default to it (e.g. in the US: Imperial, in UK: Metric)
+
 ```ts
 import { createWeatherImage } from 'open-weather-image';
 
 const image = await createWeatherImageToday({
-    key: 'YOUR API KEY',
+    key: process.env.WEATHER_API_KEY,
     cityName: 'Springfield',
     stateCode: 'OR',
     countryCode: 'US',
@@ -62,7 +68,7 @@ With Forecast
 import { createWeatherImage } from 'open-weather-image';
 
 const image = await createWeatherImage({
-    key: 'YOUR API KEY',
+    key: process.env.WEATHER_API_KEY,
     cityName: 'Adelaide',
     withForecast: true,
 });
