@@ -88,7 +88,7 @@ const myTheme = {
 };
 
 const image = await createWeatherImage({
-    key: 'YOUR API KEY',
+    key: process.env.WEATHER_API_KEY,
     cityName: 'Adelaide',
     withForecast: true,
     theme: myTheme,
