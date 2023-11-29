@@ -46,7 +46,7 @@ With Imperial Units
 
 ![Imperial](https://github.com/Kira-Kitsune/open-weather-image/blob/main/imperial.png?raw=true)
 
-Note: if a country by default uses Imperial or Metric units, it will default to it (e.g. in the US: Imperial, in UK: Metric)
+> Omitting the `tempUnit` property will use the preferred temperature unit of the target country.
 
 ```ts
 import { createWeatherImage } from 'open-weather-image';
@@ -59,8 +59,6 @@ const image = await createWeatherImageToday({
     tempUnit: 'imperial',
 });
 ```
-
-> Omitting the `tempUnit` property will use the preferred temperature unit of the target country.
 
 With Forecast
 
