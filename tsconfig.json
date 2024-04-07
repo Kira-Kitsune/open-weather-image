@@ -1,12 +1,24 @@
 {
-    "compilerOptions": {
-        "target": "ES2021",
-        "module": "commonjs",
-        "moduleResolution": "node",
-        "declaration": true,
-        "strict": true,
-        "outDir": "dist"
-    },
-    "include": ["src"],
-    "exclude": ["node_modules", "**/__tests__/*"]
+	"compilerOptions": {
+		"lib": ["ESNext"],
+		"target": "ESNext",
+		"module": "ESNext",
+		"moduleDetection": "force",
+		"jsx": "react-jsx",
+		"allowJs": true,
+
+		/* Bundler mode */
+		"moduleResolution": "bundler",
+		"allowImportingTsExtensions": true,
+		"verbatimModuleSyntax": true,
+		"noEmit": true,
+
+		/* Linting */
+		"skipLibCheck": true,
+		"strict": true,
+		"noFallthroughCasesInSwitch": true,
+		"forceConsistentCasingInFileNames": true
+	},
+	"include": ["src"],
+	"exclude": ["node_modules", "**/__tests__/*"]
 }

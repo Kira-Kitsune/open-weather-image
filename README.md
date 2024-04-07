@@ -18,8 +18,14 @@ Optionally if you don't like the default colours, you can customise the theme (O
 
 # Installation
 
+npm:
 ```sh
-$ npm install open-weather-image
+npm install open-weather-image
+```
+
+bun:
+```sh
+bun add open-weather-image
 ```
 
 # Usage
@@ -30,23 +36,50 @@ Recommended to put your API key as an environment variable.
 
 [How to Start OpenWeather](https://openweathermap.org/appid)
 
-With Metric Units
+### Basic Usage
+> You can output with a buffer or base64 string. `Default: "buffer"`
+
+Base 64:
+```ts
+import { createWeatherImage } from 'open-weather-image';
+
+const image = await createWeatherImageToday({
+    key: process.env.WEATHER_API_KEY,
+    cityName: 'Munich',
+    output: 'base64',
+});
+```
+
+Buffer:
+```ts
+import { createWeatherImage } from 'open-weather-image';
+
+const image = await createWeatherImageToday({
+    key: process.env.WEATHER_API_KEY,
+    cityName: 'Munich',
+    output: 'buffer',
+});
+```
+
+
+
+### With Metric Units
 
 ```ts
 import { createWeatherImage } from 'open-weather-image';
 
 const image = await createWeatherImageToday({
     key: process.env.WEATHER_API_KEY,
-    cityName: 'Adelaide',
-    tempUnit: 'metric',
+    cityName: 'Munich',
+    units: 'metric',
 });
 ```
 
-With Imperial Units
+### With Imperial Units
 
 ![Imperial](https://github.com/Kira-Kitsune/open-weather-image/blob/main/imperial.png?raw=true)
 
-> Omitting the `tempUnit` property will use the preferred temperature unit of the target country.
+> Omitting the `units` property will use the preferred temperature unit of the target country.
 
 ```ts
 import { createWeatherImage } from 'open-weather-image';
@@ -56,23 +89,91 @@ const image = await createWeatherImageToday({
     cityName: 'Springfield',
     stateCode: 'OR',
     countryCode: 'US',
-    tempUnit: 'imperial',
+    units: 'imperial',
 });
 ```
 
-With Forecast
+### With Forecast
+
+![WithForecast](https://github.com/Kira-Kitsune/open-weather-image/blob/main/withforecast.png?raw=true)
 
 ```ts
 import { createWeatherImage } from 'open-weather-image';
 
 const image = await createWeatherImage({
     key: process.env.WEATHER_API_KEY,
-    cityName: 'Adelaide',
+    cityName: 'Munich',
     withForecast: true,
 });
 ```
 
-With a Theme
+### Choosing a Locale
+
+> Currently only English and German is supported, and tested with, feel free to [contribute](#contributing) with other langauges within the [i18n.ts](./src/utils/i18n.ts) file. `Default: "en"`
+
+![ChangingLocale](https://github.com/Kira-Kitsune/open-weather-image/blob/main/localeDE.png?raw=true)
+
+```ts
+import { createWeatherImage } from "open-weather-image"
+
+const image = await createWeatherImage({
+    key: process.env.WEATHER_API_KEY,
+    cityName: 'Munich',
+    withForecast: true,
+    locale: "de",
+});
+```
+
+#### Possible Locales (All the ones that don't have full support are disabled)
+    af - Afrikaans
+    al - Albanian
+    ar - Arabic
+    az - Azerbaijani
+    bg - Bulgarian
+    ca - Catalan
+    cz - Czech
+    da - Danish
+    de - German (Full Support)
+    el - Greek
+    en - English (Full Support)
+    eu - Basque
+    fa - Persian (Farsi)
+    fi - Finnish
+    fr - French
+    gl - Galician
+    he - Hebrew
+    hi - Hindi
+    hr - Croatian
+    hu - Hungarian
+    id - Indonesian
+    it - Italian
+    ja - Japanese
+    kr - Korean
+    la - Latvian
+    lt - Lithuanian
+    mk - Macedonian
+    no - Norwegian
+    nl - Dutch
+    pl - Polish
+    pt - Portuguese
+    pt_br - Português Brasil
+    ro - Romanian
+    ru - Russian
+    sv, se - Swedish
+    sk - Slovak
+    sl - Slovenian
+    sp, es - Spanish
+    sr - Serbian
+    th - Thai
+    tr - Turkish
+    ua, uk - Ukrainian
+    vi - Vietnamese
+    zh_cn - Chinese Simplified
+    zh_tw - Chinese Traditional
+    zu - Zulu
+
+### With a Theme
+![WithTheme](https://github.com/Kira-Kitsune/open-weather-image/blob/main/withtheme.png?raw=true)
 
 ```ts
 import { createWeatherImage } from 'open-weather-image';
@@ -87,24 +188,18 @@ const myTheme = {
 
 const image = await createWeatherImage({
     key: process.env.WEATHER_API_KEY,
-    cityName: 'Adelaide',
+    cityName: 'Munich',
     withForecast: true,
     theme: myTheme,
 });
 ```
 
-Result:
-
-![WithTheme](https://github.com/Kira-Kitsune/open-weather-image/blob/main/withtheme.png?raw=true)
-
-Importing the theme type (TypeScript)
-
+Importing the theme type in TypeScript
 ```ts
 import type { Theme } from 'open-weather-image';
 ```
 
 Default Theme
-
 ```ts
 const defaultTheme = {
     dayThemeLeft: '#FFD982',
@@ -124,12 +219,11 @@ const defaultTheme = {
 ```
 
 # Contributing
-
 Before creating an issue, please ensure that it hasn't already been reported/suggested.
-You are free to submit a PR to this repo, please fork first, english and german is the preferred languages.
+
+You are free to submit a PR to this repo, please fork first, please only communicate in English or German.
 
 # License
-
 open-weather-image is available under the MIT license. See the LICENSE.md file for more info.
 
-Copyright &copy; 2022-2023 Kira Kitsune <https://kirakitsune.com>, All rights reserved.
+Copyright &copy; 2022-2024 Kira Kitsune <https://kirakitsune.com>, All rights reserved.

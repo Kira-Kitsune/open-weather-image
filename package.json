@@ -1,47 +1,56 @@
 {
-    "name": "open-weather-image",
-    "version": "3.0.2",
-    "description": "A npm package to create images (base64 png) from the open weather API",
-    "exports": "./dist/index.js",
-    "types": "dist/index.d.ts",
-    "scripts": {
-        "build": "tsc",
-        "prepare": "npm run build && ncp ./src/weathericons-font.ttf ./dist/weathericons-font.ttf"
-    },
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/Kira-Kitsune/open-weather-image.git"
-    },
-    "keywords": [
-        "weather",
-        "openweather",
-        "canvas",
-        "@napi-rs/canvas",
-        "image",
-        "openweatherapi",
-        "openweathermap",
-        "base64",
-        "png",
-        "buffer",
-        "types",
-        "typescript"
-    ],
-    "author": "Kira Kitsune",
-    "license": "MIT",
-    "bugs": {
-        "url": "https://github.com/Kira-Kitsune/open-weather-image/issues"
-    },
-    "homepage": "https://github.com/Kira-Kitsune/open-weather-image#readme",
-    "files": [
-        "dist/**/*"
-    ],
-    "devDependencies": {
-        "@types/node": "^20.10.0",
-        "ncp": "^2.0.0",
-        "typescript": "^5.3.2"
-    },
-    "dependencies": {
-        "@napi-rs/canvas": "^0.1.44",
-        "axios": "^1.6.2"
-    }
+	"name": "open-weather-image",
+	"version": "3.0.2",
+	"description": "A npm package to create images (base64 png) from the open weather API",
+	"scripts": {
+		"build": "bun ./build.ts"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/Kira-Kitsune/open-weather-image.git"
+	},
+	"keywords": [
+		"weather",
+		"openweather",
+		"canvas",
+		"@napi-rs/canvas",
+		"image",
+		"openweatherapi",
+		"openweathermap",
+		"base64",
+		"png",
+		"buffer",
+		"types",
+		"typescript"
+	],
+	"author": {
+		"name": "Kira Kitsune",
+		"email": "contact@kirakitsune.com",
+		"url": "https://kirakitsune.com/"
+	},
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/Kira-Kitsune/open-weather-image/issues"
+	},
+	"homepage": "https://github.com/Kira-Kitsune/open-weather-image#readme",
+	"packageManager": "bun@1.1.2",
+	"devDependencies": {
+		"@biomejs/biome": "1.6.4",
+		"@types/bun": "^1.0.12",
+		"tsup": "^8.0.2",
+		"typescript": "^5.4.4"
+	},
+	"dependencies": {
+		"@napi-rs/canvas": "^0.1.51"
+	},
+	"main": "./dist/cjs/index.js",
+	"module": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.mjs",
+			"require": "./dist/cjs/index.js"
+		}
+	}
 }
