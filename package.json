@@ -1,6 +1,6 @@
 {
 	"name": "open-weather-image",
-	"version": "4.0.0",
+	"version": "4.0.1",
 	"description": "A npm package to create images (base64 png) from the open weather API",
 	"scripts": {
 		"build": "bun ./build.ts"
@@ -53,5 +53,7 @@
 			"require": "./dist/cjs/index.js"
 		}
 	},
-	"files": ["./dist/**/*"]
+	"files": [
+		"./dist/**/*"
+	]
 }
